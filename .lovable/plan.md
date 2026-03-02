@@ -1,85 +1,72 @@
 
-# Adicionar PDI (Plano de Desenvolvimento Individual) pos-calibracao
+
+# Reestruturar PDI com Modelo de Mentoring + Conhecimento Tecnico + Navegacao
 
 ## Visao Geral
-Apos a calibracao de um lider, o usuario podera definir um PDI com acoes de desenvolvimento vinculadas as competencias avaliadas. O PDI sera acessivel a partir da tela de calibracao e tera sua propria tela dedicada.
+
+Tres mudancas principais baseadas no modelo de Mentoring da imagem enviada:
+
+1. Adicionar **"Conhecimento Tecnico"** como nova competencia
+2. Reestruturar o formulario do PDI com as colunas do modelo de mentoring: **Conhecimento, Habilidade, Atitude, Metodologia e Indicadores**
+3. Adicionar **link "PDI" na navegacao superior**
 
 ---
 
-## Mudancas na Base de Dados (`src/data/store.ts`)
+## 1. Nova Competencia (`src/data/store.ts`)
 
-### Novo tipo `AcaoPDI`
+Adicionar ao array `COMPETENCIAS_INICIAIS`:
+
+```text
+{ id: "conhecimento-tecnico", nome: "Conhecimento Técnico", eixo: "desempenho", ordem: 4 }
+```
+
+---
+
+## 2. Reestruturar o Tipo AcaoPDI (`src/data/store.ts`)
+
+O tipo atual tem um unico campo `acao` (texto livre). Sera expandido para refletir o modelo de mentoring com 5 dimensoes:
 
 ```text
 AcaoPDI {
-  id: string                    // UUID gerado
-  competenciaId: string         // Vinculada a qual competencia
-  acao: string                  // Descricao da acao de desenvolvimento
-  prazo: string                 // Data ou periodo alvo (ex: "Jun/2026")
-  responsavel: string           // Quem acompanha (gestor, RH, etc.)
+  id: string
+  competenciaId: string
+  conhecimento: string      // O que precisa aprender (teoria, conceitos)
+  habilidade: string        // O que precisa praticar (skills)
+  atitude: string           // Comportamentos a desenvolver
+  metodologia: string       // Como sera desenvolvido (mentoria, shadowing, cursos)
+  indicadores: string       // Como medir o progresso
+  prazo: string
+  responsavel: string
   status: "pendente" | "em_andamento" | "concluida"
 }
 ```
 
-### Mudanca no tipo `Lider`
-Adicionar campo `pdi: AcaoPDI[]` (array, default `[]`).
-
-### Novas funcoes
-- `getPDI(liderId)` — retorna as acoes de PDI do lider
-- `savePDI(liderId, acoes)` — salva as acoes no lider
-- Migracao automatica para lideres existentes que nao tenham o campo `pdi`
+Migracao automatica: PDIs existentes que tenham o campo `acao` terao o conteudo movido para `conhecimento`, e os demais campos serao inicializados vazios.
 
 ---
 
-## Nova Tela: PDI do Lider (`src/pages/PDI.tsx`)
+## 3. Redesenhar a Pagina PDI (`src/pages/PDI.tsx`)
 
-Acessada pela rota `/pdi/:id`. Conteudo:
+Layout atualizado com 5 campos organizados em grid para cada acao de desenvolvimento:
 
-1. **Cabecalho** com nome do lider, area e um resumo da calibracao (notas por competencia)
-2. **Lista de acoes de PDI** agrupadas por competencia, cada uma com:
-   - Campo de texto para a acao de desenvolvimento
-   - Campo de prazo
-   - Campo de responsavel
-   - Seletor de status (Pendente / Em Andamento / Concluida) com cores visuais
-3. **Botao "Adicionar Acao"** por competencia — foco nas competencias com nota 1 ou 2 (sugestao automatica)
-4. **Botao Salvar** para persistir no localStorage
+- **Linha 1**: Conhecimento | Habilidade | Atitude (3 colunas iguais)
+- **Linha 2**: Metodologia (campo largo)
+- **Linha 3**: Indicadores Avaliados (campo largo)
+- **Linha 4**: Prazo | Responsavel | Status (como ja existe)
 
-### Logica inteligente
-- Ao abrir o PDI de um lider ja calibrado, as competencias com nota "Abaixo do Esperado" (1) ou "Atende" (2) serao destacadas como prioridade de desenvolvimento
-- Competencias com nota 3 ("Supera") aparecerao em secao separada como "Pontos Fortes"
+Cada competencia continua agrupada em cards, com prioridades de desenvolvimento destacadas.
 
 ---
 
-## Ajustes na Tela de Calibracao (`src/pages/Calibration.tsx`)
+## 4. Adicionar PDI na Navegacao (`src/components/Layout.tsx`)
 
-- Apos salvar a avaliacao, exibir um botao "Definir PDI" que navega para `/pdi/:id`
-- Adicionar botao "PDI" no topo do perfil se o lider ja foi avaliado
-
----
-
-## Ajustes na Lista de Lideres (`src/pages/Index.tsx`)
-
-- Adicionar indicador visual de PDI definido (icone ou badge) ao lado do status de avaliacao
-- Botao rapido para acessar o PDI de cada lider
+Adicionar item "PDI" no menu superior que navega para a lista de lideres (pagina inicial) com foco no PDI. Como o PDI e sempre vinculado a um lider especifico, o link levara para `/` onde o usuario pode escolher o lider e acessar seu PDI.
 
 ---
 
-## Ajustes no Roteamento (`src/App.tsx`)
+## Arquivos Afetados
 
-- Nova rota: `/pdi/:id` apontando para o componente `PDI`
+1. **`src/data/store.ts`** -- Nova competencia "Conhecimento Tecnico", tipo AcaoPDI expandido com 5 campos, migracao
+2. **`src/pages/PDI.tsx`** -- Redesign com layout de mentoring (grid Conhecimento/Habilidade/Atitude + Metodologia + Indicadores)
+3. **`src/components/Layout.tsx`** -- Novo link "PDI" na navegacao superior
 
----
-
-## Ajustes no Layout (`src/components/Layout.tsx`)
-
-- Nenhuma mudanca necessaria na navegacao principal (PDI e acessado via lider, nao pelo menu global)
-
----
-
-## Arquivos afetados
-
-1. `src/data/store.ts` — Novo tipo `AcaoPDI`, campo `pdi` no `Lider`, funcoes de acesso, migracao
-2. `src/pages/PDI.tsx` — Nova pagina completa do PDI
-3. `src/pages/Calibration.tsx` — Botao de navegacao para PDI
-4. `src/pages/Index.tsx` — Indicador de PDI na lista
-5. `src/App.tsx` — Nova rota `/pdi/:id`
