@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Users, BarChart3, Settings, FileText, LogOut } from "lucide-react";
+import { Users, BarChart3, Settings, FileText, LogOut, UserCog } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { getUsuarioLogado, logout } from "@/data/store";
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: BarChart3 },
   { to: "/competencias", label: "Competências", icon: Settings },
   { to: "/pdi", label: "PDI", icon: FileText },
+  { to: "/usuarios", label: "Usuários", icon: UserCog },
 ];
 
 function getInitials(nome: string): string {
