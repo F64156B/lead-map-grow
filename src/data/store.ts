@@ -23,7 +23,11 @@ export interface ExperienciaProfissional {
 export interface AcaoPDI {
   id: string;
   competenciaId: string;
-  acao: string;
+  conhecimento: string;
+  habilidade: string;
+  atitude: string;
+  metodologia: string;
+  indicadores: string;
   prazo: string;
   responsavel: string;
   status: "pendente" | "em_andamento" | "concluida";
@@ -46,6 +50,7 @@ const COMPETENCIAS_INICIAIS: Competencia[] = [
   { id: "entrega-resultados", nome: "Entrega de Resultados (KPIs)", eixo: "desempenho", ordem: 1 },
   { id: "cultura-valores", nome: "Cultura e Valores Adimax", eixo: "potencial", ordem: 2 },
   { id: "gestao-pessoas", nome: "Gestão de Pessoas (Liderança)", eixo: "potencial", ordem: 3 },
+  { id: "conhecimento-tecnico", nome: "Conhecimento Técnico", eixo: "desempenho", ordem: 4 },
 ];
 
 const LIDERES_INICIAIS: Lider[] = [
@@ -234,6 +239,20 @@ function migrateLideres(lideres: any[]): Lider[] {
     if (!l.pdi) {
       l.pdi = [];
     }
+    // Migrate old AcaoPDI format (single 'acao' field) to new mentoring model
+    l.pdi = l.pdi.map((a: any) => {
+      if ('acao' in a && !('conhecimento' in a)) {
+        return {
+          ...a,
+          conhecimento: a.acao || "",
+          habilidade: "",
+          atitude: "",
+          metodologia: "",
+          indicadores: "",
+        };
+      }
+      return a;
+    });
     return l as Lider;
   });
 }
@@ -251,7 +270,7 @@ export function saveCompetencias(c: Competencia[]) {
 export function getLideres(): Lider[] {
   const raw = load(KEYS.lideres, LIDERES_INICIAIS);
   const needsMigration = raw.some(
-    (l: any) => typeof l.formacao === "string" || typeof l.experiencia === "string" || !l.pdi
+    (l: any) => typeof l.formacao === "string" || typeof l.experiencia === "string" || !l.pdi || l.pdi.some((a: any) => 'acao' in a && !('conhecimento' in a))
   );
   if (needsMigration) {
     const migrated = migrateLideres(raw);

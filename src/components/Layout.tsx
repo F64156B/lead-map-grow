@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Users, ClipboardCheck, BarChart3, Settings } from "lucide-react";
+import { Users, ClipboardCheck, BarChart3, Settings, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { to: "/", label: "Líderes", icon: Users },
   { to: "/dashboard", label: "Dashboard", icon: BarChart3 },
   { to: "/competencias", label: "Competências", icon: Settings },
+  { to: "/pdi", label: "PDI", icon: FileText },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -32,7 +33,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 to={to}
                 className={cn(
                   "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  pathname === to
+                  pathname === to || (to !== "/" && pathname.startsWith(to))
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
