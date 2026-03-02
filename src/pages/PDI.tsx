@@ -8,9 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getLider, getCompetencias, savePDI, isLiderAvaliado } from "@/data/store";
+import { getLider, getLideres, getCompetencias, savePDI, isLiderAvaliado } from "@/data/store";
 import type { AcaoPDI } from "@/data/store";
 import { toast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   pendente: { label: "Pendente", className: "bg-muted text-muted-foreground" },
@@ -24,7 +25,49 @@ const NOTA_LABELS: Record<number, string> = {
   3: "Supera",
 };
 
-export default function PDI() {
+// PDI List page (no :id param)
+function PDIList() {
+  const lideres = getLideres();
+  const competencias = getCompetencias();
+
+  return (
+    <Layout>
+      <div className="mx-auto max-w-3xl space-y-6">
+        <h2 className="text-2xl font-bold">Planos de Desenvolvimento Individual</h2>
+        <p className="text-muted-foreground">Selecione um líder para visualizar ou definir seu PDI.</p>
+        <div className="space-y-2">
+          {lideres.map((lider) => {
+            const avaliado = isLiderAvaliado(lider, competencias);
+            const pdiCount = lider.pdi?.length || 0;
+            return (
+              <Link
+                key={lider.id}
+                to={`/pdi/${lider.id}`}
+                className="flex items-center justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-accent"
+              >
+                <div>
+                  <p className="font-medium">{lider.nome}</p>
+                  <p className="text-sm text-muted-foreground">{lider.area}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {pdiCount > 0 && (
+                    <Badge variant="secondary">{pdiCount} ação(ões)</Badge>
+                  )}
+                  {!avaliado && (
+                    <Badge variant="outline" className="text-xs text-destructive border-destructive">Não calibrado</Badge>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </Layout>
+  );
+}
+
+// PDI Detail page
+function PDIDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const lider = getLider(id || "");
@@ -42,7 +85,6 @@ export default function PDI() {
 
   const avaliado = isLiderAvaliado(lider, competencias);
 
-  // Separate competencies by priority
   const prioridade = competencias.filter((c) => {
     const nota = lider.avaliacoes[c.id];
     return nota !== undefined && nota <= 2;
@@ -57,7 +99,11 @@ export default function PDI() {
     const nova: AcaoPDI = {
       id: crypto.randomUUID(),
       competenciaId,
-      acao: "",
+      conhecimento: "",
+      habilidade: "",
+      atitude: "",
+      metodologia: "",
+      indicadores: "",
       prazo: "",
       responsavel: "",
       status: "pendente",
@@ -96,15 +142,63 @@ export default function PDI() {
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           {compAcoes.map((acao) => (
-            <div key={acao.id} className="space-y-2 rounded-lg border bg-muted/20 p-3">
-              <Textarea
-                placeholder="Descreva a ação de desenvolvimento..."
-                value={acao.acao}
-                onChange={(e) => updateAcao(acao.id, "acao", e.target.value)}
-                className="min-h-[60px] resize-none"
-              />
+            <div key={acao.id} className="space-y-3 rounded-lg border bg-muted/20 p-4">
+              {/* Row 1: Conhecimento | Habilidade | Atitude */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Conhecimento</label>
+                  <Textarea
+                    placeholder="O que precisa aprender (teoria, conceitos)..."
+                    value={acao.conhecimento}
+                    onChange={(e) => updateAcao(acao.id, "conhecimento", e.target.value)}
+                    className="min-h-[60px] resize-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Habilidade</label>
+                  <Textarea
+                    placeholder="O que precisa praticar (skills)..."
+                    value={acao.habilidade}
+                    onChange={(e) => updateAcao(acao.id, "habilidade", e.target.value)}
+                    className="min-h-[60px] resize-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Atitude</label>
+                  <Textarea
+                    placeholder="Comportamentos a desenvolver..."
+                    value={acao.atitude}
+                    onChange={(e) => updateAcao(acao.id, "atitude", e.target.value)}
+                    className="min-h-[60px] resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Metodologia */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Metodologia</label>
+                <Textarea
+                  placeholder="Como será desenvolvido (mentoria, shadowing, cursos, encontros)..."
+                  value={acao.metodologia}
+                  onChange={(e) => updateAcao(acao.id, "metodologia", e.target.value)}
+                  className="min-h-[50px] resize-none"
+                />
+              </div>
+
+              {/* Row 3: Indicadores */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Indicadores Avaliados</label>
+                <Textarea
+                  placeholder="Como medir o progresso e sucesso..."
+                  value={acao.indicadores}
+                  onChange={(e) => updateAcao(acao.id, "indicadores", e.target.value)}
+                  className="min-h-[50px] resize-none"
+                />
+              </div>
+
+              {/* Row 4: Prazo | Responsável | Status */}
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <Input
                   placeholder="Prazo (ex: Jun/2026)"
@@ -147,7 +241,7 @@ export default function PDI() {
 
   return (
     <Layout>
-      <div className="mx-auto max-w-2xl space-y-6">
+      <div className="mx-auto max-w-3xl space-y-6">
         <div className="flex items-center justify-between">
           <Button variant="ghost" onClick={() => navigate(`/calibrar/${lider.id}`)} className="gap-2">
             <ArrowLeft className="h-4 w-4" /> Voltar
@@ -168,7 +262,6 @@ export default function PDI() {
           </CardContent>
         </Card>
 
-        {/* Priority: Low-scoring competencies */}
         {prioridade.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -179,7 +272,6 @@ export default function PDI() {
           </div>
         )}
 
-        {/* Non-evaluated competencies */}
         {naoAvaliadas.length > 0 && avaliado === false && (
           <div className="space-y-3">
             <h3 className="text-lg font-semibold text-muted-foreground">Competências não avaliadas</h3>
@@ -187,7 +279,6 @@ export default function PDI() {
           </div>
         )}
 
-        {/* Strong points */}
         {pontosFortes.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -198,7 +289,6 @@ export default function PDI() {
           </div>
         )}
 
-        {/* All competencies if no evaluation */}
         {!avaliado && prioridade.length === 0 && pontosFortes.length === 0 && (
           <div className="space-y-3">
             <h3 className="text-lg font-semibold">Competências</h3>
@@ -212,4 +302,9 @@ export default function PDI() {
       </div>
     </Layout>
   );
+}
+
+export default function PDI() {
+  const { id } = useParams<{ id: string }>();
+  return id ? <PDIDetail /> : <PDIList />;
 }

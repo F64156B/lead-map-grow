@@ -21,6 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/calibrar/:id" element={<Calibration />} />
+          <Route path="/pdi" element={<PDI />} />
           <Route path="/pdi/:id" element={<PDI />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/competencias" element={<Competencies />} />
