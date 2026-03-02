@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, ClipboardList } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -87,16 +87,30 @@ export default function Index() {
                       {typeof lider.formacao === "string" ? lider.formacao : lider.formacao.graduacao}
                     </TableCell>
                     <TableCell className="text-center">
-                      {avaliado ? (
-                        <Badge className="bg-success text-success-foreground">✅ Avaliado</Badge>
-                      ) : (
-                        <Badge variant="secondary">⏳ Pendente</Badge>
-                      )}
+                      <div className="flex items-center justify-center gap-1">
+                        {avaliado ? (
+                          <Badge className="bg-success text-success-foreground">✅ Avaliado</Badge>
+                        ) : (
+                          <Badge variant="secondary">⏳ Pendente</Badge>
+                        )}
+                        {lider.pdi && lider.pdi.length > 0 && (
+                          <Badge variant="outline" className="gap-1 text-xs">
+                            <ClipboardList className="h-3 w-3" /> PDI
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" onClick={() => navigate(`/calibrar/${lider.id}`)}>
-                        Calibrar
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button size="sm" onClick={() => navigate(`/calibrar/${lider.id}`)}>
+                          Calibrar
+                        </Button>
+                        {avaliado && (
+                          <Button size="sm" variant="outline" onClick={() => navigate(`/pdi/${lider.id}`)}>
+                            PDI
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
