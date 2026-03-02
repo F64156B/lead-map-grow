@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogIn, ClipboardCheck } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { login } from "@/data/store";
+import dpaLogo from "@/assets/DPA.png";
+import adimaxLogo from "@/assets/Adimax.png";
 import { toast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
@@ -29,11 +31,10 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-3">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-            <ClipboardCheck className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <img src={dpaLogo} alt="DPA - Desenvolvimento Profissional Adimax" className="mx-auto h-16 w-auto" />
           <CardTitle className="text-2xl">Calibração Adimax</CardTitle>
           <p className="text-sm text-muted-foreground">Mapeamento de Liderança</p>
+          <img src={adimaxLogo} alt="Adimax" className="mx-auto h-8 w-auto opacity-70" />
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
