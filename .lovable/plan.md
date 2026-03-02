@@ -1,72 +1,121 @@
 
 
-# Reestruturar PDI com Modelo de Mentoring + Conhecimento Tecnico + Navegacao
+# Login, Reset de Calibracao e Dados Reais da Planilha
 
 ## Visao Geral
 
-Tres mudancas principais baseadas no modelo de Mentoring da imagem enviada:
+Tres grandes mudancas:
 
-1. Adicionar **"Conhecimento Tecnico"** como nova competencia
-2. Reestruturar o formulario do PDI com as colunas do modelo de mentoring: **Conhecimento, Habilidade, Atitude, Metodologia e Indicadores**
-3. Adicionar **link "PDI" na navegacao superior**
-
----
-
-## 1. Nova Competencia (`src/data/store.ts`)
-
-Adicionar ao array `COMPETENCIAS_INICIAIS`:
-
-```text
-{ id: "conhecimento-tecnico", nome: "Conhecimento Técnico", eixo: "desempenho", ordem: 4 }
-```
+1. **Tela de Login** com autenticacao local (pedro.souza@adimax.com.br / 1234) e registro de mudancas
+2. **Reset de calibracao** — permitir limpar a avaliacao de um lider ja calibrado
+3. **Substituir os 15 lideres** pelos dados reais da planilha Gestao GO
 
 ---
 
-## 2. Reestruturar o Tipo AcaoPDI (`src/data/store.ts`)
+## 1. Sistema de Login e Registro de Mudancas
 
-O tipo atual tem um unico campo `acao` (texto livre). Sera expandido para refletir o modelo de mentoring com 5 dimensoes:
+### Modelo de dados (`src/data/store.ts`)
+
+Novos tipos e funcoes:
 
 ```text
-AcaoPDI {
+Usuario {
+  email: string
+  senha: string (hash simples)
+  nome: string
+  role: "admin" | "usuario"
+}
+
+LogMudanca {
   id: string
-  competenciaId: string
-  conhecimento: string      // O que precisa aprender (teoria, conceitos)
-  habilidade: string        // O que precisa praticar (skills)
-  atitude: string           // Comportamentos a desenvolver
-  metodologia: string       // Como sera desenvolvido (mentoria, shadowing, cursos)
-  indicadores: string       // Como medir o progresso
-  prazo: string
-  responsavel: string
-  status: "pendente" | "em_andamento" | "concluida"
+  timestamp: string (ISO)
+  usuario: string (email)
+  tipo: "calibracao" | "pdi" | "reset"
+  liderId: string
+  liderNome: string
+  descricao: string
 }
 ```
 
-Migracao automatica: PDIs existentes que tenham o campo `acao` terao o conteudo movido para `conhecimento`, e os demais campos serao inicializados vazios.
+- Usuario padrao: Pedro Souza (pedro.souza@adimax.com.br, senha 1234, role admin)
+- Funcoes: `login()`, `logout()`, `getUsuarioLogado()`, `registrarMudanca()`, `getLogMudancas()`
+- Dados persistidos no localStorage
+
+### Nova pagina: Login (`src/pages/Login.tsx`)
+
+- Formulario com email e senha
+- Redireciona para "/" apos login
+- Exibe erro se credenciais invalidas
+
+### Protecao de rotas (`src/App.tsx`)
+
+- Componente `ProtectedRoute` que verifica se ha usuario logado
+- Se nao logado, redireciona para `/login`
+- Botao de logout no header (`Layout.tsx`)
+
+### Registro automatico de mudancas
+
+- Ao salvar calibracao: registra log com competencias e notas
+- Ao salvar PDI: registra log
+- Ao resetar calibracao: registra log
 
 ---
 
-## 3. Redesenhar a Pagina PDI (`src/pages/PDI.tsx`)
+## 2. Reset de Calibracao
 
-Layout atualizado com 5 campos organizados em grid para cada acao de desenvolvimento:
+### Na pagina de Calibracao (`src/pages/Calibration.tsx`)
 
-- **Linha 1**: Conhecimento | Habilidade | Atitude (3 colunas iguais)
-- **Linha 2**: Metodologia (campo largo)
-- **Linha 3**: Indicadores Avaliados (campo largo)
-- **Linha 4**: Prazo | Responsavel | Status (como ja existe)
+- Se o lider ja foi avaliado, exibir botao "Resetar Calibracao" (com confirmacao)
+- Ao confirmar, limpa `avaliacoes` do lider e registra no log de mudancas
 
-Cada competencia continua agrupada em cards, com prioridades de desenvolvimento destacadas.
+### Na lista de lideres (`src/pages/Index.tsx`)
+
+- Botao de reset visivel apenas para lideres ja avaliados (icone de refresh)
 
 ---
 
-## 4. Adicionar PDI na Navegacao (`src/components/Layout.tsx`)
+## 3. Dados Reais da Planilha
 
-Adicionar item "PDI" no menu superior que navega para a lista de lideres (pagina inicial) com foco no PDI. Como o PDI e sempre vinculado a um lider especifico, o link levara para `/` onde o usuario pode escolher o lider e acessar seu PDI.
+### Substituir `LIDERES_INICIAIS` (`src/data/store.ts`)
+
+Os 15 lideres atuais (com dados ficticios) serao substituidos pelos dados reais da planilha:
+
+| # | Nome | Area | Idade |
+|---|------|------|-------|
+| 1 | Camila Machado Fragoso | Gerencia Industrial | 33 |
+| 2 | Daniel Henrique Alves de Amorim | Extrusora | 27 |
+| 3 | Ednilson Luiz Barbosa | Logistica Expedicao | 38 |
+| 4 | Eduardo Vitor da Costa | Manutencao Eletrica | 29 |
+| 5 | Ernesto do Nascimento Junior | Administrativo Producao | 48 |
+| 6 | Francinaldo Roseno de Carvalho | Administrativo Producao | 32 |
+| 7 | Guilherme Augusto Soares dos Reis | Ensaque | 30 |
+| 8 | Luiz Carlos Rabelo Vinhal | Ensaque | 30 |
+| 9 | Manaces da Fonseca Fonseca | Extrusora | 44 |
+| 10 | Mariana Matos Batista | Ensaque | 22 |
+| 11 | Natanna Bianca Alves Oliveira | Gestao de Qualidade | 33 |
+| 12 | Paulo Cezar Goncalves de Oliveira | Administrativo | 46 |
+| 13 | Tatiana Candida da Silva Amorim | Formulacao | 40 |
+| 14 | Thaian da Silva Alves | SMA | 37 |
+| 15 | Wellington Rodrigues de Morais Myto | Extrusora | 36 |
+
+Cada lider tera:
+- **Formacao**: extraida da planilha (graduacao, pos-graduacao quando houver)
+- **Experiencia**: os 3 ultimos cargos conforme a planilha
+- Novas areas serao adicionadas ao mapeamento de cores (Logistica Expedicao, Manutencao Eletrica, Administrativo Producao, Formulacao, SMA, Gestao de Qualidade, Administrativo)
+
+### Migracao
+
+- Limpar localStorage antigo com dados ficticios para forcar carregamento dos dados reais
+- Adicionar versao de dados para controle de migracao
 
 ---
 
 ## Arquivos Afetados
 
-1. **`src/data/store.ts`** -- Nova competencia "Conhecimento Tecnico", tipo AcaoPDI expandido com 5 campos, migracao
-2. **`src/pages/PDI.tsx`** -- Redesign com layout de mentoring (grid Conhecimento/Habilidade/Atitude + Metodologia + Indicadores)
-3. **`src/components/Layout.tsx`** -- Novo link "PDI" na navegacao superior
+1. **`src/data/store.ts`** — Tipos Usuario/LogMudanca, 15 lideres reais, funcoes de auth e log, novas cores de area
+2. **`src/pages/Login.tsx`** — Nova pagina de login (criacao)
+3. **`src/App.tsx`** — Rota /login, ProtectedRoute
+4. **`src/components/Layout.tsx`** — Botao logout, nome do usuario logado
+5. **`src/pages/Calibration.tsx`** — Botao reset calibracao com confirmacao e log
+6. **`src/pages/Index.tsx`** — Botao reset na lista
 
