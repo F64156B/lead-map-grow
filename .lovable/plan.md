@@ -1,72 +1,85 @@
 
+# Adicionar PDI (Plano de Desenvolvimento Individual) pos-calibracao
 
-# Expandir Formacao e Experiencia Profissional dos Lideres
-
-## O que muda
-
-Atualmente, cada lider tem apenas uma string simples para "Formacao" (ex: "Engenharia de Producao") e "Experiencia" (ex: "10 anos"). O objetivo e enriquecer esses campos com informacoes completas.
+## Visao Geral
+Apos a calibracao de um lider, o usuario podera definir um PDI com acoes de desenvolvimento vinculadas as competencias avaliadas. O PDI sera acessivel a partir da tela de calibracao e tera sua propria tela dedicada.
 
 ---
 
 ## Mudancas na Base de Dados (`src/data/store.ts`)
 
-### Novo modelo de dados
-
-O campo `formacao` passa de `string` para um objeto com detalhes academicos:
+### Novo tipo `AcaoPDI`
 
 ```text
-formacao: {
-  graduacao: string        // Ex: "Engenharia de Producao"
-  instituicao: string      // Ex: "USP"
-  posGraduacao?: string    // Ex: "MBA em Gestao Industrial"
-  instituicaoPg?: string   // Ex: "FGV"
+AcaoPDI {
+  id: string                    // UUID gerado
+  competenciaId: string         // Vinculada a qual competencia
+  acao: string                  // Descricao da acao de desenvolvimento
+  prazo: string                 // Data ou periodo alvo (ex: "Jun/2026")
+  responsavel: string           // Quem acompanha (gestor, RH, etc.)
+  status: "pendente" | "em_andamento" | "concluida"
 }
 ```
 
-O campo `experiencia` passa de `string` para um array com os 3 ultimos cargos/empregos:
+### Mudanca no tipo `Lider`
+Adicionar campo `pdi: AcaoPDI[]` (array, default `[]`).
 
-```text
-experiencia: [
-  { cargo: string, empresa: string, periodo: string },
-  { cargo: string, empresa: string, periodo: string },
-  { cargo: string, empresa: string, periodo: string }
-]
-```
-
-### Dados pre-carregados
-
-Os 15 lideres serao atualizados com dados ficticios mas realistas para cada um, baseados na area de atuacao. Exemplo para Camila Machado:
-
-- Formacao: Engenharia de Producao (UFMG), MBA em Gestao Industrial (FGV)
-- Experiencia:
-  1. Gerente Industrial - Adimax (2019-atual)
-  2. Coordenadora de Producao - Adimax (2016-2019)
-  3. Analista de Processos - Nestle Purina (2013-2016)
-
-### Compatibilidade
-
-Uma funcao de migracao verificara se os dados no localStorage estao no formato antigo (string) e os convertera automaticamente para o novo formato, evitando perda de dados.
+### Novas funcoes
+- `getPDI(liderId)` — retorna as acoes de PDI do lider
+- `savePDI(liderId, acoes)` — salva as acoes no lider
+- Migracao automatica para lideres existentes que nao tenham o campo `pdi`
 
 ---
 
-## Mudancas na Tela de Calibracao (`src/pages/Calibration.tsx`)
+## Nova Tela: PDI do Lider (`src/pages/PDI.tsx`)
 
-O card de perfil do lider sera expandido para exibir:
+Acessada pela rota `/pdi/:id`. Conteudo:
 
-1. **Secao "Formacao Academica"** - com graduacao, instituicao, e pos-graduacao (quando houver)
-2. **Secao "Experiencia Profissional"** - lista dos 3 ultimos cargos com cargo, empresa e periodo, apresentados em formato de timeline visual
+1. **Cabecalho** com nome do lider, area e um resumo da calibracao (notas por competencia)
+2. **Lista de acoes de PDI** agrupadas por competencia, cada uma com:
+   - Campo de texto para a acao de desenvolvimento
+   - Campo de prazo
+   - Campo de responsavel
+   - Seletor de status (Pendente / Em Andamento / Concluida) com cores visuais
+3. **Botao "Adicionar Acao"** por competencia — foco nas competencias com nota 1 ou 2 (sugestao automatica)
+4. **Botao Salvar** para persistir no localStorage
+
+### Logica inteligente
+- Ao abrir o PDI de um lider ja calibrado, as competencias com nota "Abaixo do Esperado" (1) ou "Atende" (2) serao destacadas como prioridade de desenvolvimento
+- Competencias com nota 3 ("Supera") aparecerao em secao separada como "Pontos Fortes"
 
 ---
 
-## Mudancas na Lista de Lideres (`src/pages/Index.tsx`)
+## Ajustes na Tela de Calibracao (`src/pages/Calibration.tsx`)
 
-Atualizar a exibicao na tabela/lista para mostrar a graduacao principal (nao o objeto completo).
+- Apos salvar a avaliacao, exibir um botao "Definir PDI" que navega para `/pdi/:id`
+- Adicionar botao "PDI" no topo do perfil se o lider ja foi avaliado
+
+---
+
+## Ajustes na Lista de Lideres (`src/pages/Index.tsx`)
+
+- Adicionar indicador visual de PDI definido (icone ou badge) ao lado do status de avaliacao
+- Botao rapido para acessar o PDI de cada lider
+
+---
+
+## Ajustes no Roteamento (`src/App.tsx`)
+
+- Nova rota: `/pdi/:id` apontando para o componente `PDI`
+
+---
+
+## Ajustes no Layout (`src/components/Layout.tsx`)
+
+- Nenhuma mudanca necessaria na navegacao principal (PDI e acessado via lider, nao pelo menu global)
 
 ---
 
 ## Arquivos afetados
 
-1. **`src/data/store.ts`** - Novos tipos (`FormacaoAcademica`, `ExperienciaProfissional`), dados expandidos dos 15 lideres, funcao de migracao
-2. **`src/pages/Calibration.tsx`** - Card de perfil expandido com secoes de formacao e experiencia
-3. **`src/pages/Index.tsx`** - Ajustar exibicao da formacao na lista
-
+1. `src/data/store.ts` — Novo tipo `AcaoPDI`, campo `pdi` no `Lider`, funcoes de acesso, migracao
+2. `src/pages/PDI.tsx` — Nova pagina completa do PDI
+3. `src/pages/Calibration.tsx` — Botao de navegacao para PDI
+4. `src/pages/Index.tsx` — Indicador de PDI na lista
+5. `src/App.tsx` — Nova rota `/pdi/:id`
