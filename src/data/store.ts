@@ -44,6 +44,22 @@ export interface Lider {
   pdi: AcaoPDI[];
 }
 
+export interface Usuario {
+  email: string;
+  nome: string;
+  role: "admin" | "usuario";
+}
+
+export interface LogMudanca {
+  id: string;
+  timestamp: string;
+  usuario: string;
+  tipo: "calibracao" | "pdi" | "reset";
+  liderId: string;
+  liderNome: string;
+  descricao: string;
+}
+
 // ========== INITIAL DATA ==========
 
 const COMPETENCIAS_INICIAIS: Competencia[] = [
@@ -53,154 +69,158 @@ const COMPETENCIAS_INICIAIS: Competencia[] = [
   { id: "conhecimento-tecnico", nome: "Conhecimento Técnico", eixo: "desempenho", ordem: 4 },
 ];
 
+const USUARIOS_INICIAIS: { email: string; senha: string; nome: string; role: "admin" | "usuario" }[] = [
+  { email: "pedro.souza@adimax.com.br", senha: "1234", nome: "Pedro Souza", role: "admin" },
+];
+
 const LIDERES_INICIAIS: Lider[] = [
   {
-    id: "1", nome: "Camila Machado", area: "Gerência Industrial", idade: 35,
-    formacao: { graduacao: "Engenharia de Produção", instituicao: "UFMG", posGraduacao: "MBA em Gestão Industrial", instituicaoPg: "FGV" },
+    id: "1", nome: "Camila Machado Fragoso", area: "Gerência Industrial", idade: 33,
+    formacao: { graduacao: "Engenharia de Produção / Medicina Veterinária", instituicao: "", posGraduacao: "Especialização em Relações Sindicais e Trabalhistas", instituicaoPg: "" },
     experiencia: [
-      { cargo: "Gerente Industrial", empresa: "Adimax", periodo: "2019–atual" },
-      { cargo: "Coordenadora de Produção", empresa: "Adimax", periodo: "2016–2019" },
-      { cargo: "Analista de Processos", empresa: "Nestlé Purina", periodo: "2013–2016" },
+      { cargo: "Head Industrial I", empresa: "Adimax", periodo: "" },
+      { cargo: "Gerente Industrial", empresa: "Adimax", periodo: "" },
+      { cargo: "Supervisor de Produção", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "2", nome: "Daniel Henrique", area: "Extrusora", idade: 32,
-    formacao: { graduacao: "Engenharia Mecânica", instituicao: "UNESP", posGraduacao: "Especialização em Processos Industriais", instituicaoPg: "SENAI" },
+    id: "2", nome: "Daniel Henrique Alves de Amorim", area: "Extrusora", idade: 27,
+    formacao: { graduacao: "Gestão de Produção Industrial (incompleto)", instituicao: "" },
     experiencia: [
-      { cargo: "Supervisor de Extrusão", empresa: "Adimax", periodo: "2020–atual" },
-      { cargo: "Operador Sênior de Extrusora", empresa: "Adimax", periodo: "2017–2020" },
-      { cargo: "Técnico de Processos", empresa: "BRF", periodo: "2014–2017" },
+      { cargo: "Líder de Produção III", empresa: "Adimax", periodo: "" },
+      { cargo: "Líder de Produção II", empresa: "Adimax", periodo: "" },
+      { cargo: "Líder de Produção I", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "3", nome: "Lucas Ferreira", area: "Extrusora", idade: 28,
-    formacao: { graduacao: "Técnico em Mecânica", instituicao: "SENAI" },
+    id: "3", nome: "Ednilson Luiz Barbosa", area: "Logística Expedição", idade: 38,
+    formacao: { graduacao: "Tecnologia em Logística", instituicao: "" },
     experiencia: [
-      { cargo: "Líder de Turno – Extrusão", empresa: "Adimax", periodo: "2021–atual" },
-      { cargo: "Operador de Extrusora", empresa: "Adimax", periodo: "2018–2021" },
-      { cargo: "Auxiliar de Produção", empresa: "Mogiana Alimentos", periodo: "2016–2018" },
+      { cargo: "Líder de Logística I", empresa: "Adimax", periodo: "" },
+      { cargo: "Líder de Logística", empresa: "Adimax", periodo: "" },
+      { cargo: "Operador de Máquina", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "4", nome: "Marcos Vinícius", area: "Ensaque", idade: 40,
-    formacao: { graduacao: "Administração de Empresas", instituicao: "PUC-Campinas", posGraduacao: "MBA em Gestão de Operações", instituicaoPg: "INSPER" },
+    id: "4", nome: "Eduardo Vitor da Costa", area: "Manutenção Elétrica", idade: 29,
+    formacao: { graduacao: "Técnico em Eletromecânica", instituicao: "" },
     experiencia: [
-      { cargo: "Coordenador de Ensaque", empresa: "Adimax", periodo: "2017–atual" },
-      { cargo: "Supervisor de Embalagem", empresa: "Adimax", periodo: "2013–2017" },
-      { cargo: "Analista de Logística", empresa: "M. Dias Branco", periodo: "2010–2013" },
+      { cargo: "Líder de Manutenção Elétrica II", empresa: "Adimax", periodo: "" },
+      { cargo: "Líder de Manutenção Elétrica I", empresa: "Adimax", periodo: "" },
+      { cargo: "Líder de Manutenção I", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "5", nome: "Patrícia Souza", area: "Ensaque", idade: 33,
-    formacao: { graduacao: "Engenharia Química", instituicao: "UNICAMP", posGraduacao: "Especialização em Embalagens", instituicaoPg: "CETEA/ITAL" },
+    id: "5", nome: "Ernesto do Nascimento Junior", area: "Administrativo Produção", idade: 48,
+    formacao: { graduacao: "Engenharia de Produção", instituicao: "", posGraduacao: "Técnico em Química Industrial", instituicaoPg: "" },
     experiencia: [
-      { cargo: "Líder de Ensaque", empresa: "Adimax", periodo: "2020–atual" },
-      { cargo: "Analista de Qualidade de Embalagem", empresa: "Adimax", periodo: "2017–2020" },
-      { cargo: "Estagiária de P&D", empresa: "Cargill", periodo: "2015–2017" },
+      { cargo: "Supervisor de Produção", empresa: "Adimax", periodo: "" },
+      { cargo: "Gerente Industrial", empresa: "", periodo: "" },
+      { cargo: "Gerente de Produção", empresa: "", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "6", nome: "Roberto Carlos", area: "Logística", idade: 45,
-    formacao: { graduacao: "Logística", instituicao: "FATEC", posGraduacao: "MBA em Supply Chain Management", instituicaoPg: "FGV" },
+    id: "6", nome: "Francinaldo Roseno de Carvalho", area: "Administrativo Produção", idade: 32,
+    formacao: { graduacao: "Tecnólogo em Gestão da Qualidade", instituicao: "" },
     experiencia: [
-      { cargo: "Gerente de Logística", empresa: "Adimax", periodo: "2015–atual" },
-      { cargo: "Coordenador de Distribuição", empresa: "Adimax", periodo: "2010–2015" },
-      { cargo: "Analista de Transportes", empresa: "JBS", periodo: "2005–2010" },
+      { cargo: "Coordenador de Produção", empresa: "Adimax", periodo: "" },
+      { cargo: "Analista de Processos Industriais", empresa: "Adimax", periodo: "" },
+      { cargo: "Supervisor de Produção", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "7", nome: "Fernanda Lima", area: "Logística", idade: 30,
-    formacao: { graduacao: "Administração", instituicao: "Mackenzie" },
+    id: "7", nome: "Guilherme Augusto Soares dos Reis", area: "Ensaque", idade: 30,
+    formacao: { graduacao: "Tecnólogo em Processos Químicos", instituicao: "" },
     experiencia: [
-      { cargo: "Analista de Logística Sênior", empresa: "Adimax", periodo: "2021–atual" },
-      { cargo: "Analista de Logística", empresa: "Adimax", periodo: "2019–2021" },
-      { cargo: "Assistente Administrativo", empresa: "DHL", periodo: "2017–2019" },
+      { cargo: "Líder de Produção I", empresa: "Adimax", periodo: "" },
+      { cargo: "Assistente de Qualidade Sênior", empresa: "Adimax", periodo: "" },
+      { cargo: "Assistente de Qualidade Pleno", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "8", nome: "João Pedro", area: "Qualidade", idade: 38,
-    formacao: { graduacao: "Engenharia de Alimentos", instituicao: "UNESP", posGraduacao: "MBA em Gestão da Qualidade", instituicaoPg: "USP" },
+    id: "8", nome: "Luiz Carlos Rabelo Vinhal", area: "Ensaque", idade: 30,
+    formacao: { graduacao: "Administração", instituicao: "" },
     experiencia: [
-      { cargo: "Coordenador de Qualidade", empresa: "Adimax", periodo: "2018–atual" },
-      { cargo: "Analista de Qualidade Sênior", empresa: "Adimax", periodo: "2014–2018" },
-      { cargo: "Analista de Controle de Qualidade", empresa: "Nestlé Purina", periodo: "2011–2014" },
+      { cargo: "Líder de Produção I", empresa: "Adimax", periodo: "" },
+      { cargo: "Líder de Produção", empresa: "Adimax", periodo: "" },
+      { cargo: "Operador de Máquina", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "9", nome: "Ana Carolina", area: "Qualidade", idade: 29,
-    formacao: { graduacao: "Medicina Veterinária", instituicao: "UNESP", posGraduacao: "Especialização em Nutrição Animal", instituicaoPg: "UFLA" },
+    id: "9", nome: "Manacés da Fonseca Fonseca", area: "Extrusora", idade: 44,
+    formacao: { graduacao: "Biomedicina", instituicao: "" },
     experiencia: [
-      { cargo: "Analista de Qualidade", empresa: "Adimax", periodo: "2021–atual" },
-      { cargo: "Estagiária de Qualidade", empresa: "Adimax", periodo: "2019–2021" },
-      { cargo: "Auxiliar Veterinária", empresa: "Clínica VetPet", periodo: "2018–2019" },
+      { cargo: "Analista de Produção", empresa: "Adimax", periodo: "" },
+      { cargo: "Líder de Produção", empresa: "Adimax", periodo: "" },
+      { cargo: "Monitor de Produção", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "10", nome: "Ricardo Alves", area: "Manutenção", idade: 42,
-    formacao: { graduacao: "Engenharia Elétrica", instituicao: "USP", posGraduacao: "Especialização em Manutenção Industrial", instituicaoPg: "ABRAMAN" },
+    id: "10", nome: "Mariana Matos Batista", area: "Ensaque", idade: 22,
+    formacao: { graduacao: "Ensino Médio Completo", instituicao: "" },
     experiencia: [
-      { cargo: "Gerente de Manutenção", empresa: "Adimax", periodo: "2016–atual" },
-      { cargo: "Coordenador de Manutenção", empresa: "Adimax", periodo: "2012–2016" },
-      { cargo: "Engenheiro de Manutenção", empresa: "Ambev", periodo: "2008–2012" },
+      { cargo: "Líder de Produção I", empresa: "Adimax", periodo: "" },
+      { cargo: "Operador de Produção I", empresa: "Adimax", periodo: "" },
+      { cargo: "Operador de Máquina", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "11", nome: "Thiago Santos", area: "Manutenção", idade: 36,
-    formacao: { graduacao: "Engenharia Mecânica", instituicao: "UNICAMP" },
+    id: "11", nome: "Natanna Bianca Alves Oliveira", area: "Gestão de Qualidade", idade: 33,
+    formacao: { graduacao: "Medicina Veterinária", instituicao: "", posGraduacao: "Pós-Graduação em Defesa Sanitária e Inspeção de Produtos de Origem Animal", instituicaoPg: "" },
     experiencia: [
-      { cargo: "Supervisor de Manutenção Mecânica", empresa: "Adimax", periodo: "2019–atual" },
-      { cargo: "Técnico de Manutenção Sênior", empresa: "Adimax", periodo: "2015–2019" },
-      { cargo: "Técnico Mecânico", empresa: "WEG", periodo: "2012–2015" },
+      { cargo: "Coordenador de Qualidade", empresa: "Adimax", periodo: "" },
+      { cargo: "Analista da Garantia da Qualidade Pleno", empresa: "Adimax", periodo: "" },
+      { cargo: "Médico Veterinário", empresa: "", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "12", nome: "Juliana Costa", area: "PCP", idade: 31,
-    formacao: { graduacao: "Engenharia de Produção", instituicao: "UFSCar", posGraduacao: "MBA em Planejamento e Controle da Produção", instituicaoPg: "EESC/USP" },
+    id: "12", nome: "Paulo Cezar Gonçalves de Oliveira", area: "Administrativo", idade: 46,
+    formacao: { graduacao: "Administração", instituicao: "" },
     experiencia: [
-      { cargo: "Coordenadora de PCP", empresa: "Adimax", periodo: "2020–atual" },
-      { cargo: "Analista de PCP", empresa: "Adimax", periodo: "2017–2020" },
-      { cargo: "Analista de Planejamento", empresa: "Vigor", periodo: "2015–2017" },
+      { cargo: "Coordenador Administrativo", empresa: "Adimax", periodo: "" },
+      { cargo: "Gestor de Compras", empresa: "Adimax", periodo: "" },
+      { cargo: "Gestor Logístico", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "13", nome: "Bruno Oliveira", area: "PCP", idade: 34,
-    formacao: { graduacao: "Administração", instituicao: "FACAMP", posGraduacao: "Especialização em Lean Manufacturing", instituicaoPg: "SENAI" },
+    id: "13", nome: "Tatiana Cândida da Silva Amorim", area: "Formulação", idade: 40,
+    formacao: { graduacao: "Tecnologia em Gestão da Produção Industrial", instituicao: "" },
     experiencia: [
-      { cargo: "Analista de PCP Sênior", empresa: "Adimax", periodo: "2019–atual" },
-      { cargo: "Analista de PCP", empresa: "Adimax", periodo: "2016–2019" },
-      { cargo: "Assistente de Produção", empresa: "Bauducco", periodo: "2013–2016" },
+      { cargo: "Líder de Produção II", empresa: "Adimax", periodo: "" },
+      { cargo: "Líder de Produção I", empresa: "Adimax", periodo: "" },
+      { cargo: "Líder de Produção", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "14", nome: "Carla Mendes", area: "Segurança do Trabalho", idade: 37,
-    formacao: { graduacao: "Engenharia de Segurança do Trabalho", instituicao: "UNIP", posGraduacao: "Especialização em Higiene Ocupacional", instituicaoPg: "FUNDACENTRO" },
+    id: "14", nome: "Thaian da Silva Alves", area: "SMA", idade: 37,
+    formacao: { graduacao: "Engenharia Ambiental e Sanitária", instituicao: "", posGraduacao: "Engenharia de Segurança do Trabalho / Técnico em Segurança do Trabalho", instituicaoPg: "" },
     experiencia: [
-      { cargo: "Coordenadora de Segurança do Trabalho", empresa: "Adimax", periodo: "2017–atual" },
-      { cargo: "Técnica de Segurança Sênior", empresa: "Adimax", periodo: "2013–2017" },
-      { cargo: "Técnica de Segurança", empresa: "Raízen", periodo: "2010–2013" },
+      { cargo: "Supervisor de SSMA", empresa: "Adimax", periodo: "" },
+      { cargo: "Supervisor de Segurança do Trabalho", empresa: "Adimax", periodo: "" },
+      { cargo: "Técnico em Segurança do Trabalho e Meio Ambiente", empresa: "", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
   {
-    id: "15", nome: "Eduardo Silva", area: "Gerência Industrial", idade: 44,
-    formacao: { graduacao: "Engenharia de Produção", instituicao: "POLI/USP", posGraduacao: "MBA Executivo em Gestão Empresarial", instituicaoPg: "FGV" },
+    id: "15", nome: "Wellington Rodrigues de Morais Myto", area: "Extrusora", idade: 36,
+    formacao: { graduacao: "Ensino Médio Completo", instituicao: "" },
     experiencia: [
-      { cargo: "Diretor Industrial", empresa: "Adimax", periodo: "2018–atual" },
-      { cargo: "Gerente de Operações", empresa: "Adimax", periodo: "2013–2018" },
-      { cargo: "Coordenador de Produção", empresa: "Mars Petcare", periodo: "2008–2013" },
+      { cargo: "Líder de Produção I", empresa: "Adimax", periodo: "" },
+      { cargo: "Operador de Produção II", empresa: "Adimax", periodo: "" },
+      { cargo: "Operador de Produção I", empresa: "Adimax", periodo: "" },
     ],
     avaliacoes: {}, pdi: [],
   },
@@ -211,7 +231,12 @@ const LIDERES_INICIAIS: Lider[] = [
 const KEYS = {
   competencias: "adimax_competencias",
   lideres: "adimax_lideres",
+  usuarioLogado: "adimax_usuario_logado",
+  logMudancas: "adimax_log_mudancas",
+  dataVersion: "adimax_data_version",
 };
+
+const CURRENT_DATA_VERSION = "3";
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -239,7 +264,6 @@ function migrateLideres(lideres: any[]): Lider[] {
     if (!l.pdi) {
       l.pdi = [];
     }
-    // Migrate old AcaoPDI format (single 'acao' field) to new mentoring model
     l.pdi = l.pdi.map((a: any) => {
       if ('acao' in a && !('conhecimento' in a)) {
         return {
@@ -255,6 +279,68 @@ function migrateLideres(lideres: any[]): Lider[] {
     });
     return l as Lider;
   });
+}
+
+function checkDataVersion() {
+  const storedVersion = localStorage.getItem(KEYS.dataVersion);
+  if (storedVersion !== CURRENT_DATA_VERSION) {
+    // Clear old data to force reload with real data
+    localStorage.removeItem(KEYS.lideres);
+    localStorage.removeItem(KEYS.competencias);
+    localStorage.setItem(KEYS.dataVersion, CURRENT_DATA_VERSION);
+  }
+}
+
+// Run migration check on load
+checkDataVersion();
+
+// ========== AUTH ==========
+
+export function login(email: string, senha: string): Usuario | null {
+  const user = USUARIOS_INICIAIS.find(
+    (u) => u.email.toLowerCase() === email.toLowerCase() && u.senha === senha
+  );
+  if (user) {
+    const usuario: Usuario = { email: user.email, nome: user.nome, role: user.role };
+    save(KEYS.usuarioLogado, usuario);
+    return usuario;
+  }
+  return null;
+}
+
+export function logout() {
+  localStorage.removeItem(KEYS.usuarioLogado);
+}
+
+export function getUsuarioLogado(): Usuario | null {
+  return load<Usuario | null>(KEYS.usuarioLogado, null);
+}
+
+// ========== AUDIT LOG ==========
+
+export function registrarMudanca(
+  tipo: LogMudanca["tipo"],
+  liderId: string,
+  liderNome: string,
+  descricao: string
+) {
+  const usuario = getUsuarioLogado();
+  const log: LogMudanca = {
+    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+    timestamp: new Date().toISOString(),
+    usuario: usuario?.email || "desconhecido",
+    tipo,
+    liderId,
+    liderNome,
+    descricao,
+  };
+  const logs = getLogMudancas();
+  logs.unshift(log);
+  save(KEYS.logMudancas, logs);
+}
+
+export function getLogMudancas(): LogMudanca[] {
+  return load<LogMudanca[]>(KEYS.logMudancas, []);
 }
 
 // ========== PUBLIC API ==========
@@ -295,6 +381,15 @@ export function saveLider(lider: Lider) {
   saveLideres(all);
 }
 
+export function resetCalibracaoLider(liderId: string) {
+  const lider = getLider(liderId);
+  if (lider) {
+    const liderAtualizado = { ...lider, avaliacoes: {} };
+    saveLider(liderAtualizado);
+    registrarMudanca("reset", lider.id, lider.nome, "Calibração resetada — todas as avaliações foram limpas.");
+  }
+}
+
 export function isLiderAvaliado(lider: Lider, competencias: Competencia[]): boolean {
   if (competencias.length === 0) return false;
   return competencias.every((c) => lider.avaliacoes[c.id] !== undefined);
@@ -316,11 +411,13 @@ const AREA_COLORS: Record<string, string> = {
   "Gerência Industrial": "#F28C00",
   "Extrusora": "#2563EB",
   "Ensaque": "#16A34A",
-  "Logística": "#9333EA",
-  "Qualidade": "#DC2626",
-  "Manutenção": "#CA8A04",
-  "PCP": "#0891B2",
-  "Segurança do Trabalho": "#6D28D9",
+  "Logística Expedição": "#9333EA",
+  "Manutenção Elétrica": "#CA8A04",
+  "Administrativo Produção": "#0891B2",
+  "Gestão de Qualidade": "#DC2626",
+  "Administrativo": "#6D28D9",
+  "Formulação": "#DB2777",
+  "SMA": "#059669",
 };
 
 export function getAreaColor(area: string): string {
