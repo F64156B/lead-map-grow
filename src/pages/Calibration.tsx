@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, GraduationCap, Briefcase } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,12 +56,61 @@ export default function Calibration() {
           <CardHeader>
             <CardTitle className="text-xl">{lider.nome}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-5">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div><span className="text-muted-foreground">Área:</span> {lider.area}</div>
               <div><span className="text-muted-foreground">Idade:</span> {lider.idade}</div>
-              <div><span className="text-muted-foreground">Formação:</span> {lider.formacao}</div>
-              <div><span className="text-muted-foreground">Experiência:</span> {lider.experiencia}</div>
+            </div>
+
+            {/* Formação Acadêmica */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <GraduationCap className="h-4 w-4 text-primary" />
+                Formação Acadêmica
+              </div>
+              <div className="rounded-md border bg-muted/30 p-3 text-sm space-y-1">
+                <div>
+                  <span className="font-medium">{lider.formacao.graduacao}</span>
+                  {lider.formacao.instituicao && (
+                    <span className="text-muted-foreground"> — {lider.formacao.instituicao}</span>
+                  )}
+                </div>
+                {lider.formacao.posGraduacao && (
+                  <div>
+                    <span className="font-medium">{lider.formacao.posGraduacao}</span>
+                    {lider.formacao.instituicaoPg && (
+                      <span className="text-muted-foreground"> — {lider.formacao.instituicaoPg}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Experiência Profissional */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <Briefcase className="h-4 w-4 text-primary" />
+                Experiência Profissional
+              </div>
+              <div className="space-y-0 rounded-md border bg-muted/30 p-3">
+                {lider.experiencia.map((exp, i) => (
+                  <div key={i} className="relative flex gap-3 pb-3 last:pb-0">
+                    {/* Timeline line */}
+                    <div className="flex flex-col items-center">
+                      <div className={`h-2.5 w-2.5 rounded-full ${i === 0 ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                      {i < lider.experiencia.length - 1 && (
+                        <div className="w-px flex-1 bg-border" />
+                      )}
+                    </div>
+                    <div className="text-sm pb-2">
+                      <div className="font-medium">{exp.cargo}</div>
+                      <div className="text-muted-foreground">
+                        {exp.empresa}{exp.periodo && ` · ${exp.periodo}`}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>

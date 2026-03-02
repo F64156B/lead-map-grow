@@ -83,7 +83,9 @@ export default function Index() {
                     <TableCell className="font-medium">{lider.nome}</TableCell>
                     <TableCell>{lider.area}</TableCell>
                     <TableCell className="hidden md:table-cell">{lider.idade}</TableCell>
-                    <TableCell className="hidden md:table-cell">{lider.formacao}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {typeof lider.formacao === "string" ? lider.formacao : lider.formacao.graduacao}
+                    </TableCell>
                     <TableCell className="text-center">
                       {avaliado ? (
                         <Badge className="bg-success text-success-foreground">✅ Avaliado</Badge>
