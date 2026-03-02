@@ -5,8 +5,9 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { getLider, getCompetencias, saveLider, isLiderAvaliado, resetCalibracaoLider, registrarMudanca } from "@/data/store";
+import { getLider, getCompetencias, saveLider, isLiderAvaliado, resetCalibracaoLider, registrarMudanca, getAreaColor } from "@/data/store";
 import { toast } from "@/hooks/use-toast";
 
 const NOTA_LABELS: Record<number, { label: string; emoji: string; color: string }> = {
@@ -51,8 +52,11 @@ export default function Calibration() {
     setAvaliacoes((prev) => ({ ...prev, [compId]: nota }));
   };
 
-  const allFilled = competencias.every((c) => avaliacoes[c.id] !== undefined);
+  const filledCount = competencias.filter(c => avaliacoes[c.id] !== undefined).length;
+  const allFilled = filledCount === competencias.length;
   const jaAvaliado = isLiderAvaliado(lider, competencias);
+  const progressPercent = competencias.length > 0 ? (filledCount / competencias.length) * 100 : 0;
+  const areaColor = getAreaColor(lider.area);
 
   return (
     <Layout>
@@ -89,9 +93,16 @@ export default function Calibration() {
         )}
 
         {/* Leader Profile */}
-        <Card>
+        <Card className="overflow-hidden card-elevated border-0">
+          {/* Area color strip */}
+          <div className="h-1.5 w-full" style={{ backgroundColor: areaColor }} />
           <CardHeader>
-            <CardTitle className="text-xl">{lider.nome}</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl">{lider.nome}</CardTitle>
+              <Badge variant="outline" className="text-xs font-semibold" style={{ borderColor: areaColor, color: areaColor }}>
+                {lider.area}
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -105,7 +116,7 @@ export default function Calibration() {
                 <GraduationCap className="h-4 w-4 text-primary" />
                 Formação Acadêmica
               </div>
-              <div className="rounded-md border bg-muted/30 p-3 text-sm space-y-1">
+              <div className="rounded-lg border bg-muted/30 p-3 text-sm space-y-1">
                 <div>
                   <span className="font-medium">{lider.formacao.graduacao}</span>
                   {lider.formacao.instituicao && (
@@ -129,10 +140,9 @@ export default function Calibration() {
                 <Briefcase className="h-4 w-4 text-primary" />
                 Experiência Profissional
               </div>
-              <div className="space-y-0 rounded-md border bg-muted/30 p-3">
+              <div className="space-y-0 rounded-lg border bg-muted/30 p-3">
                 {lider.experiencia.map((exp, i) => (
                   <div key={i} className="relative flex gap-3 pb-3 last:pb-0">
-                    {/* Timeline line */}
                     <div className="flex flex-col items-center">
                       <div className={`h-2.5 w-2.5 rounded-full ${i === 0 ? "bg-primary" : "bg-muted-foreground/40"}`} />
                       {i < lider.experiencia.length - 1 && (
@@ -152,13 +162,21 @@ export default function Calibration() {
           </CardContent>
         </Card>
 
+        {/* Progress bar */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <h3 className="text-lg font-semibold">Avaliação de Competências</h3>
+            <span className="text-muted-foreground font-medium">{filledCount}/{competencias.length} avaliadas</span>
+          </div>
+          <Progress value={progressPercent} className="h-2" />
+        </div>
+
         {/* Competencies */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Avaliação de Competências</h3>
           {competencias.map((comp) => {
             const selected = avaliacoes[comp.id];
             return (
-              <Card key={comp.id}>
+              <Card key={comp.id} className="card-elevated border-0">
                 <CardContent className="pt-6">
                   <div className="mb-1 flex items-center justify-between">
                     <span className="font-medium">{comp.nome}</span>
@@ -174,10 +192,10 @@ export default function Calibration() {
                         <button
                           key={nota}
                           onClick={() => setNota(comp.id, nota)}
-                          className={`rounded-lg border-2 p-3 text-center text-sm font-medium transition-all ${
+                          className={`rounded-xl border-2 p-3 text-center text-sm font-medium transition-all hover:scale-[1.03] ${
                             isSelected
-                              ? info.color + " ring-2 ring-ring"
-                              : "border-border bg-card hover:border-primary/40"
+                              ? info.color + " ring-2 ring-ring shadow-md scale-[1.03]"
+                              : "border-border bg-card hover:border-primary/40 hover:shadow-sm"
                           }`}
                         >
                           <div className="text-lg">{info.emoji}</div>
@@ -193,7 +211,7 @@ export default function Calibration() {
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={handleSave} disabled={!allFilled} className="flex-1 gap-2" size="lg">
+          <Button onClick={handleSave} disabled={!allFilled} className="flex-1 gap-2 shadow-md hover:shadow-lg" size="lg">
             <Save className="h-4 w-4" /> Salvar Avaliação
           </Button>
           {allFilled && (

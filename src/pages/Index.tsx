@@ -1,15 +1,18 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, ClipboardList, RotateCcw } from "lucide-react";
+import { Search, Filter, ClipboardList, RotateCcw, Users, CheckCircle2, Clock, UserCheck } from "lucide-react";
 import Layout from "@/components/Layout";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { getLideres, getCompetencias, isLiderAvaliado, getAreas, resetCalibracaoLider } from "@/data/store";
+import { getLideres, getCompetencias, isLiderAvaliado, getAreas, resetCalibracaoLider, getUsuarioLogado } from "@/data/store";
 import { toast } from "@/hooks/use-toast";
+import dpaLogo from "@/assets/DPA.png";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -20,6 +23,10 @@ export default function Index() {
   const lideres = useMemo(() => getLideres(), [refreshKey]);
   const competencias = getCompetencias();
   const areas = useMemo(() => getAreas(lideres), [lideres]);
+  const usuario = getUsuarioLogado();
+
+  const avaliados = useMemo(() => lideres.filter(l => isLiderAvaliado(l, competencias)).length, [lideres, competencias]);
+  const pendentes = lideres.length - avaliados;
 
   const filtered = useMemo(() => {
     return lideres.filter((l) => {
@@ -35,9 +42,54 @@ export default function Index() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold">Líderes</h2>
-          <p className="text-muted-foreground">Selecione um líder para iniciar a calibração</p>
+        {/* Welcome Banner */}
+        <div className="rounded-2xl p-6 flex items-center justify-between"
+          style={{ background: "linear-gradient(135deg, hsl(33 100% 47% / 0.08) 0%, hsl(33 100% 47% / 0.02) 100%)" }}
+        >
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold">
+              Olá, {usuario?.nome?.split(" ")[0] || "Bem-vindo"}! 👋
+            </h2>
+            <p className="text-muted-foreground">Selecione um líder para iniciar a calibração</p>
+          </div>
+          <img src={dpaLogo} alt="DPA" className="h-12 w-auto opacity-40 hidden sm:block" />
+        </div>
+
+        {/* Stat Cards */}
+        <div className="grid grid-cols-3 gap-4">
+          <Card className="card-elevated border-0">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{lideres.length}</p>
+                <p className="text-xs text-muted-foreground">Total Líderes</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="card-elevated border-0">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
+                <UserCheck className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{avaliados}</p>
+                <p className="text-xs text-muted-foreground">Avaliados</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="card-elevated border-0">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning/10">
+                <Clock className="h-5 w-5 text-warning" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{pendentes}</p>
+                <p className="text-xs text-muted-foreground">Pendentes</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Filters */}
@@ -66,10 +118,10 @@ export default function Index() {
         </div>
 
         {/* Table */}
-        <div className="rounded-lg border bg-card shadow-sm">
+        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-muted/40">
                 <TableHead>Nome</TableHead>
                 <TableHead>Área</TableHead>
                 <TableHead className="hidden md:table-cell">Idade</TableHead>
@@ -79,10 +131,13 @@ export default function Index() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((lider) => {
+              {filtered.map((lider, index) => {
                 const avaliado = isLiderAvaliado(lider, competencias);
                 return (
-                  <TableRow key={lider.id}>
+                  <TableRow key={lider.id} className={cn(
+                    "hover:bg-accent/50 transition-colors",
+                    index % 2 === 1 && "bg-muted/20"
+                  )}>
                     <TableCell className="font-medium">{lider.nome}</TableCell>
                     <TableCell>{lider.area}</TableCell>
                     <TableCell className="hidden md:table-cell">{lider.idade}</TableCell>
@@ -92,9 +147,13 @@ export default function Index() {
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center gap-1">
                         {avaliado ? (
-                          <Badge className="bg-success text-success-foreground">✅ Avaliado</Badge>
+                          <Badge className="bg-success text-success-foreground gap-1">
+                            <CheckCircle2 className="h-3 w-3" /> Avaliado
+                          </Badge>
                         ) : (
-                          <Badge variant="secondary">⏳ Pendente</Badge>
+                          <Badge variant="secondary" className="gap-1">
+                            <Clock className="h-3 w-3" /> Pendente
+                          </Badge>
                         )}
                         {lider.pdi && lider.pdi.length > 0 && (
                           <Badge variant="outline" className="gap-1 text-xs">
