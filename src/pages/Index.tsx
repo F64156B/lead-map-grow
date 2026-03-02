@@ -1,20 +1,23 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, ClipboardList } from "lucide-react";
+import { Search, Filter, ClipboardList, RotateCcw } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getLideres, getCompetencias, isLiderAvaliado, getAreas } from "@/data/store";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { getLideres, getCompetencias, isLiderAvaliado, getAreas, resetCalibracaoLider } from "@/data/store";
+import { toast } from "@/hooks/use-toast";
 
 export default function Index() {
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [areaFiltro, setAreaFiltro] = useState("todas");
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const lideres = getLideres();
+  const lideres = useMemo(() => getLideres(), [refreshKey]);
   const competencias = getCompetencias();
   const areas = useMemo(() => getAreas(lideres), [lideres]);
 
@@ -106,9 +109,34 @@ export default function Index() {
                           Calibrar
                         </Button>
                         {avaliado && (
-                          <Button size="sm" variant="outline" onClick={() => navigate(`/pdi/${lider.id}`)}>
-                            PDI
-                          </Button>
+                          <>
+                            <Button size="sm" variant="outline" onClick={() => navigate(`/pdi/${lider.id}`)}>
+                              PDI
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="ghost" title="Resetar Calibração">
+                                  <RotateCcw className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Resetar calibração?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Todas as avaliações de {lider.nome} serão removidas.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => {
+                                    resetCalibracaoLider(lider.id);
+                                    setRefreshKey(k => k + 1);
+                                    toast({ title: "Calibração resetada", description: `${lider.nome} foi limpo.` });
+                                  }}>Confirmar</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </>
                         )}
                       </div>
                     </TableCell>

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, GraduationCap, Briefcase, ClipboardList } from "lucide-react";
+import { ArrowLeft, Save, GraduationCap, Briefcase, ClipboardList, RotateCcw } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getLider, getCompetencias, saveLider, isLiderAvaliado } from "@/data/store";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { getLider, getCompetencias, saveLider, isLiderAvaliado, resetCalibracaoLider, registrarMudanca } from "@/data/store";
 import { toast } from "@/hooks/use-toast";
 
 const NOTA_LABELS: Record<number, { label: string; emoji: string; color: string }> = {
@@ -34,8 +35,16 @@ export default function Calibration() {
 
   const handleSave = () => {
     saveLider({ ...lider, avaliacoes });
+    const descricao = competencias.map(c => `${c.nome}: ${avaliacoes[c.id] || '-'}`).join(', ');
+    registrarMudanca("calibracao", lider.id, lider.nome, `Calibração salva — ${descricao}`);
     toast({ title: "Avaliação salva!", description: `Calibração de ${lider.nome} salva com sucesso.` });
     navigate("/");
+  };
+
+  const handleReset = () => {
+    resetCalibracaoLider(lider.id);
+    setAvaliacoes({});
+    toast({ title: "Calibração resetada", description: `Avaliação de ${lider.nome} foi limpa.` });
   };
 
   const setNota = (compId: string, nota: number) => {
@@ -53,9 +62,30 @@ export default function Calibration() {
         </Button>
 
         {jaAvaliado && (
-          <Button variant="outline" onClick={() => navigate(`/pdi/${lider.id}`)} className="gap-2">
-            <ClipboardList className="h-4 w-4" /> Definir PDI
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate(`/pdi/${lider.id}`)} className="gap-2">
+              <ClipboardList className="h-4 w-4" /> Definir PDI
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="gap-2">
+                  <RotateCcw className="h-4 w-4" /> Resetar Calibração
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Resetar calibração?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Todas as avaliações de {lider.nome} serão removidas. Esta ação será registrada no log.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleReset}>Confirmar Reset</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         )}
 
         {/* Leader Profile */}
