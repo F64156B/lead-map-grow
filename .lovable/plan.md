@@ -1,73 +1,72 @@
 
-# App de Calibração de Liderança Adimax
 
-## Visão Geral
-Aplicação web para avaliação e mapeamento de líderes da Adimax usando Matriz 9-Box + Radar Chart de competências, com identidade visual da marca.
+# Expandir Formacao e Experiencia Profissional dos Lideres
 
----
+## O que muda
 
-## Identidade Visual
-- **Fundo**: Branco e cinza claro, visual limpo e corporativo
-- **Cor de destaque**: Laranja Adimax (#F28C00) em botões e elementos interativos
-- **Textos**: Preto (#000000)
-- **Tipografia**: Sans-serif clean, títulos em negrito
+Atualmente, cada lider tem apenas uma string simples para "Formacao" (ex: "Engenharia de Producao") e "Experiencia" (ex: "10 anos"). O objetivo e enriquecer esses campos com informacoes completas.
 
 ---
 
-## Base de Dados (localStorage — estrutura robusta e expansível)
+## Mudancas na Base de Dados (`src/data/store.ts`)
 
-### Estrutura de Líderes
-Cada líder terá: `id`, `nome`, `area`, `idade`, `formacao`, `experiencia`, e um objeto dinâmico de `avaliacoes` (chave = id da competência, valor = nota 1-3).
+### Novo modelo de dados
 
-### Estrutura de Competências (tabela de parâmetros)
-Cada competência: `id`, `nome`, `eixo` ("desempenho" ou "potencial"), `ordem`. Isso permite adicionar/remover competências sem alterar código — o formulário e os cálculos se adaptam automaticamente.
+O campo `formacao` passa de `string` para um objeto com detalhes academicos:
 
-### Competências Iniciais
-1. Entrega de Resultados (KPIs) → eixo Desempenho
-2. Cultura e Valores Adimax → eixo Potencial
-3. Gestão de Pessoas (Liderança) → eixo Potencial
+```text
+formacao: {
+  graduacao: string        // Ex: "Engenharia de Producao"
+  instituicao: string      // Ex: "USP"
+  posGraduacao?: string    // Ex: "MBA em Gestao Industrial"
+  instituicaoPg?: string   // Ex: "FGV"
+}
+```
 
-### 15 Líderes Pré-carregados
-Dados importados da planilha Gestao_GO.xlsx com nomes, áreas, idades e formações.
+O campo `experiencia` passa de `string` para um array com os 3 ultimos cargos/empregos:
 
----
+```text
+experiencia: [
+  { cargo: string, empresa: string, periodo: string },
+  { cargo: string, empresa: string, periodo: string },
+  { cargo: string, empresa: string, periodo: string }
+]
+```
 
-## Tela 1 — Lista de Líderes
-- Tabela com todos os líderes (nome, área, idade, formação)
-- Busca por nome ou área
-- Filtro por área
-- Indicador visual: avaliado ✅ vs. pendente ⏳
-- Botão para calibrar cada líder
+### Dados pre-carregados
 
----
+Os 15 lideres serao atualizados com dados ficticios mas realistas para cada um, baseados na area de atuacao. Exemplo para Camila Machado:
 
-## Tela 2 — Calibração Individual
-- Perfil do líder no topo
-- Formulário dinâmico com todas as competências cadastradas, escala 1-3:
-  - 1 = Abaixo do Esperado 🔴
-  - 2 = Atende 🟡
-  - 3 = Supera 🟢
-- Botão salvar
+- Formacao: Engenharia de Producao (UFMG), MBA em Gestao Industrial (FGV)
+- Experiencia:
+  1. Gerente Industrial - Adimax (2019-atual)
+  2. Coordenadora de Producao - Adimax (2016-2019)
+  3. Analista de Processos - Nestle Purina (2013-2016)
 
----
+### Compatibilidade
 
-## Tela 3 — Dashboard com 9-Box + Radar Chart
-
-### Mapa 9-Box
-- Gráfico 3×3 com eixos Desempenho (X) e Potencial (Y)
-- Nomes dos líderes posicionados conforme médias
-- Cores por área
-- Filtro por área
-
-### 🆕 Radar Chart de Competências
-- Gráfico Radar (usando Recharts, já instalado) mostrando o perfil de competências
-- **Visão individual**: ao clicar num líder, exibe o radar com todas as competências dele (notas de 1 a 3 nos eixos)
-- **Visão comparativa**: possibilidade de sobrepor o radar de múltiplos líderes para comparação
-- **Visão por área**: radar com a média das competências de todos os líderes de uma área
+Uma funcao de migracao verificara se os dados no localStorage estao no formato antigo (string) e os convertera automaticamente para o novo formato, evitando perda de dados.
 
 ---
 
-## Tela 4 — Gestão de Competências
-- Adicionar nova competência (nome + eixo: Desempenho ou Potencial)
-- Editar ou remover competências
-- O formulário de calibração, o 9-Box e o Radar Chart se ajustam automaticamente
+## Mudancas na Tela de Calibracao (`src/pages/Calibration.tsx`)
+
+O card de perfil do lider sera expandido para exibir:
+
+1. **Secao "Formacao Academica"** - com graduacao, instituicao, e pos-graduacao (quando houver)
+2. **Secao "Experiencia Profissional"** - lista dos 3 ultimos cargos com cargo, empresa e periodo, apresentados em formato de timeline visual
+
+---
+
+## Mudancas na Lista de Lideres (`src/pages/Index.tsx`)
+
+Atualizar a exibicao na tabela/lista para mostrar a graduacao principal (nao o objeto completo).
+
+---
+
+## Arquivos afetados
+
+1. **`src/data/store.ts`** - Novos tipos (`FormacaoAcademica`, `ExperienciaProfissional`), dados expandidos dos 15 lideres, funcao de migracao
+2. **`src/pages/Calibration.tsx`** - Card de perfil expandido com secoes de formacao e experiencia
+3. **`src/pages/Index.tsx`** - Ajustar exibicao da formacao na lista
+
