@@ -20,6 +20,15 @@ export interface ExperienciaProfissional {
   periodo: string;
 }
 
+export interface AcaoPDI {
+  id: string;
+  competenciaId: string;
+  acao: string;
+  prazo: string;
+  responsavel: string;
+  status: "pendente" | "em_andamento" | "concluida";
+}
+
 export interface Lider {
   id: string;
   nome: string;
@@ -28,6 +37,7 @@ export interface Lider {
   formacao: FormacaoAcademica;
   experiencia: ExperienciaProfissional[];
   avaliacoes: Record<string, number>;
+  pdi: AcaoPDI[];
 }
 
 // ========== INITIAL DATA ==========
@@ -47,7 +57,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Coordenadora de Produção", empresa: "Adimax", periodo: "2016–2019" },
       { cargo: "Analista de Processos", empresa: "Nestlé Purina", periodo: "2013–2016" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "2", nome: "Daniel Henrique", area: "Extrusora", idade: 32,
@@ -57,7 +67,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Operador Sênior de Extrusora", empresa: "Adimax", periodo: "2017–2020" },
       { cargo: "Técnico de Processos", empresa: "BRF", periodo: "2014–2017" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "3", nome: "Lucas Ferreira", area: "Extrusora", idade: 28,
@@ -67,7 +77,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Operador de Extrusora", empresa: "Adimax", periodo: "2018–2021" },
       { cargo: "Auxiliar de Produção", empresa: "Mogiana Alimentos", periodo: "2016–2018" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "4", nome: "Marcos Vinícius", area: "Ensaque", idade: 40,
@@ -77,7 +87,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Supervisor de Embalagem", empresa: "Adimax", periodo: "2013–2017" },
       { cargo: "Analista de Logística", empresa: "M. Dias Branco", periodo: "2010–2013" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "5", nome: "Patrícia Souza", area: "Ensaque", idade: 33,
@@ -87,7 +97,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Analista de Qualidade de Embalagem", empresa: "Adimax", periodo: "2017–2020" },
       { cargo: "Estagiária de P&D", empresa: "Cargill", periodo: "2015–2017" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "6", nome: "Roberto Carlos", area: "Logística", idade: 45,
@@ -97,7 +107,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Coordenador de Distribuição", empresa: "Adimax", periodo: "2010–2015" },
       { cargo: "Analista de Transportes", empresa: "JBS", periodo: "2005–2010" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "7", nome: "Fernanda Lima", area: "Logística", idade: 30,
@@ -107,7 +117,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Analista de Logística", empresa: "Adimax", periodo: "2019–2021" },
       { cargo: "Assistente Administrativo", empresa: "DHL", periodo: "2017–2019" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "8", nome: "João Pedro", area: "Qualidade", idade: 38,
@@ -117,7 +127,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Analista de Qualidade Sênior", empresa: "Adimax", periodo: "2014–2018" },
       { cargo: "Analista de Controle de Qualidade", empresa: "Nestlé Purina", periodo: "2011–2014" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "9", nome: "Ana Carolina", area: "Qualidade", idade: 29,
@@ -127,7 +137,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Estagiária de Qualidade", empresa: "Adimax", periodo: "2019–2021" },
       { cargo: "Auxiliar Veterinária", empresa: "Clínica VetPet", periodo: "2018–2019" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "10", nome: "Ricardo Alves", area: "Manutenção", idade: 42,
@@ -137,7 +147,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Coordenador de Manutenção", empresa: "Adimax", periodo: "2012–2016" },
       { cargo: "Engenheiro de Manutenção", empresa: "Ambev", periodo: "2008–2012" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "11", nome: "Thiago Santos", area: "Manutenção", idade: 36,
@@ -147,7 +157,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Técnico de Manutenção Sênior", empresa: "Adimax", periodo: "2015–2019" },
       { cargo: "Técnico Mecânico", empresa: "WEG", periodo: "2012–2015" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "12", nome: "Juliana Costa", area: "PCP", idade: 31,
@@ -157,7 +167,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Analista de PCP", empresa: "Adimax", periodo: "2017–2020" },
       { cargo: "Analista de Planejamento", empresa: "Vigor", periodo: "2015–2017" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "13", nome: "Bruno Oliveira", area: "PCP", idade: 34,
@@ -167,7 +177,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Analista de PCP", empresa: "Adimax", periodo: "2016–2019" },
       { cargo: "Assistente de Produção", empresa: "Bauducco", periodo: "2013–2016" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "14", nome: "Carla Mendes", area: "Segurança do Trabalho", idade: 37,
@@ -177,7 +187,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Técnica de Segurança Sênior", empresa: "Adimax", periodo: "2013–2017" },
       { cargo: "Técnica de Segurança", empresa: "Raízen", periodo: "2010–2013" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
   {
     id: "15", nome: "Eduardo Silva", area: "Gerência Industrial", idade: 44,
@@ -187,7 +197,7 @@ const LIDERES_INICIAIS: Lider[] = [
       { cargo: "Gerente de Operações", empresa: "Adimax", periodo: "2013–2018" },
       { cargo: "Coordenador de Produção", empresa: "Mars Petcare", periodo: "2008–2013" },
     ],
-    avaliacoes: {},
+    avaliacoes: {}, pdi: [],
   },
 ];
 
@@ -215,18 +225,14 @@ function save<T>(key: string, data: T) {
 
 function migrateLideres(lideres: any[]): Lider[] {
   return lideres.map((l) => {
-    // Migrate formacao from string to object
     if (typeof l.formacao === "string") {
-      l.formacao = {
-        graduacao: l.formacao,
-        instituicao: "",
-      };
+      l.formacao = { graduacao: l.formacao, instituicao: "" };
     }
-    // Migrate experiencia from string to array
     if (typeof l.experiencia === "string") {
-      l.experiencia = [
-        { cargo: l.experiencia, empresa: "", periodo: "" },
-      ];
+      l.experiencia = [{ cargo: l.experiencia, empresa: "", periodo: "" }];
+    }
+    if (!l.pdi) {
+      l.pdi = [];
     }
     return l as Lider;
   });
@@ -244,9 +250,8 @@ export function saveCompetencias(c: Competencia[]) {
 
 export function getLideres(): Lider[] {
   const raw = load(KEYS.lideres, LIDERES_INICIAIS);
-  // Check if migration is needed
   const needsMigration = raw.some(
-    (l: any) => typeof l.formacao === "string" || typeof l.experiencia === "string"
+    (l: any) => typeof l.formacao === "string" || typeof l.experiencia === "string" || !l.pdi
   );
   if (needsMigration) {
     const migrated = migrateLideres(raw);
@@ -301,4 +306,18 @@ const AREA_COLORS: Record<string, string> = {
 
 export function getAreaColor(area: string): string {
   return AREA_COLORS[area] || "#6B7280";
+}
+
+// ========== PDI ==========
+
+export function getPDI(liderId: string): AcaoPDI[] {
+  const lider = getLider(liderId);
+  return lider?.pdi || [];
+}
+
+export function savePDI(liderId: string, acoes: AcaoPDI[]) {
+  const lider = getLider(liderId);
+  if (lider) {
+    saveLider({ ...lider, pdi: acoes });
+  }
 }

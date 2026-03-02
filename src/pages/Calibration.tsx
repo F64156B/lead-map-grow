@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, GraduationCap, Briefcase } from "lucide-react";
+import { ArrowLeft, Save, GraduationCap, Briefcase, ClipboardList } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getLider, getCompetencias, saveLider } from "@/data/store";
+import { getLider, getCompetencias, saveLider, isLiderAvaliado } from "@/data/store";
 import { toast } from "@/hooks/use-toast";
 
 const NOTA_LABELS: Record<number, { label: string; emoji: string; color: string }> = {
@@ -43,6 +43,7 @@ export default function Calibration() {
   };
 
   const allFilled = competencias.every((c) => avaliacoes[c.id] !== undefined);
+  const jaAvaliado = isLiderAvaliado(lider, competencias);
 
   return (
     <Layout>
@@ -50,6 +51,12 @@ export default function Calibration() {
         <Button variant="ghost" onClick={() => navigate("/")} className="gap-2">
           <ArrowLeft className="h-4 w-4" /> Voltar
         </Button>
+
+        {jaAvaliado && (
+          <Button variant="outline" onClick={() => navigate(`/pdi/${lider.id}`)} className="gap-2">
+            <ClipboardList className="h-4 w-4" /> Definir PDI
+          </Button>
+        )}
 
         {/* Leader Profile */}
         <Card>
@@ -155,9 +162,16 @@ export default function Calibration() {
           })}
         </div>
 
-        <Button onClick={handleSave} disabled={!allFilled} className="w-full gap-2" size="lg">
-          <Save className="h-4 w-4" /> Salvar Avaliação
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleSave} disabled={!allFilled} className="flex-1 gap-2" size="lg">
+            <Save className="h-4 w-4" /> Salvar Avaliação
+          </Button>
+          {allFilled && (
+            <Button variant="outline" onClick={() => { handleSave(); navigate(`/pdi/${lider.id}`); }} size="lg" className="gap-2">
+              <ClipboardList className="h-4 w-4" /> Salvar & Definir PDI
+            </Button>
+          )}
+        </div>
       </div>
     </Layout>
   );

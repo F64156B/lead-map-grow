@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Calibration from "./pages/Calibration";
 import Dashboard from "./pages/Dashboard";
 import Competencies from "./pages/Competencies";
+import PDI from "./pages/PDI";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/calibrar/:id" element={<Calibration />} />
+          <Route path="/pdi/:id" element={<PDI />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/competencias" element={<Competencies />} />
           <Route path="*" element={<NotFound />} />
