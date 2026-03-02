@@ -69,7 +69,14 @@ const COMPETENCIAS_INICIAIS: Competencia[] = [
   { id: "conhecimento-tecnico", nome: "Conhecimento Técnico", eixo: "desempenho", ordem: 4 },
 ];
 
-const USUARIOS_INICIAIS: { email: string; senha: string; nome: string; role: "admin" | "usuario" }[] = [
+export interface UsuarioCadastro {
+  email: string;
+  senha: string;
+  nome: string;
+  role: "admin" | "usuario";
+}
+
+const USUARIOS_INICIAIS: UsuarioCadastro[] = [
   { email: "pedro.souza@adimax.com.br", senha: "1234", nome: "Pedro Souza", role: "admin" },
 ];
 
@@ -234,6 +241,7 @@ const KEYS = {
   usuarioLogado: "adimax_usuario_logado",
   logMudancas: "adimax_log_mudancas",
   dataVersion: "adimax_data_version",
+  usuarios: "adimax_usuarios",
 };
 
 const CURRENT_DATA_VERSION = "3";
@@ -296,8 +304,56 @@ checkDataVersion();
 
 // ========== AUTH ==========
 
+// ========== USER MANAGEMENT ==========
+
+function getUsuariosCadastrados(): UsuarioCadastro[] {
+  return load(KEYS.usuarios, USUARIOS_INICIAIS);
+}
+
+function saveUsuariosCadastrados(usuarios: UsuarioCadastro[]) {
+  save(KEYS.usuarios, usuarios);
+}
+
+export function getUsuarios(): UsuarioCadastro[] {
+  return getUsuariosCadastrados();
+}
+
+export function criarUsuario(dados: UsuarioCadastro): { ok: boolean; erro?: string } {
+  const usuarios = getUsuariosCadastrados();
+  if (usuarios.some(u => u.email.toLowerCase() === dados.email.toLowerCase())) {
+    return { ok: false, erro: "E-mail já cadastrado." };
+  }
+  usuarios.push({ ...dados, email: dados.email.toLowerCase() });
+  saveUsuariosCadastrados(usuarios);
+  return { ok: true };
+}
+
+export function atualizarUsuario(email: string, dados: Partial<UsuarioCadastro>): { ok: boolean; erro?: string } {
+  const usuarios = getUsuariosCadastrados();
+  const idx = usuarios.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+  if (idx < 0) return { ok: false, erro: "Usuário não encontrado." };
+  usuarios[idx] = { ...usuarios[idx], ...dados };
+  saveUsuariosCadastrados(usuarios);
+  return { ok: true };
+}
+
+export function resetarSenhaUsuario(email: string, novaSenha: string): { ok: boolean; erro?: string } {
+  return atualizarUsuario(email, { senha: novaSenha });
+}
+
+export function excluirUsuario(email: string): { ok: boolean; erro?: string } {
+  const usuarios = getUsuariosCadastrados();
+  const filtered = usuarios.filter(u => u.email.toLowerCase() !== email.toLowerCase());
+  if (filtered.length === usuarios.length) return { ok: false, erro: "Usuário não encontrado." };
+  saveUsuariosCadastrados(filtered);
+  return { ok: true };
+}
+
+// ========== AUTH ==========
+
 export function login(email: string, senha: string): Usuario | null {
-  const user = USUARIOS_INICIAIS.find(
+  const usuarios = getUsuariosCadastrados();
+  const user = usuarios.find(
     (u) => u.email.toLowerCase() === email.toLowerCase() && u.senha === senha
   );
   if (user) {

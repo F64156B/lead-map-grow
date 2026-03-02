@@ -9,6 +9,7 @@ import Calibration from "./pages/Calibration";
 import Dashboard from "./pages/Dashboard";
 import Competencies from "./pages/Competencies";
 import PDI from "./pages/PDI";
+import UsersPage from "./pages/Users";
 import LoginPage from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/pdi/:id" element={<ProtectedRoute><PDI /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/competencias" element={<ProtectedRoute><Competencies /></ProtectedRoute>} />
+          <Route path="/usuarios" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
