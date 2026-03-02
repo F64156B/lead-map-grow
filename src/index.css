@@ -59,4 +59,18 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
+
+  /* Smooth transitions for interactive elements */
+  button, a, input, select, textarea, [role="button"] {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Custom card shadow */
+  .card-elevated {
+    box-shadow: 0 4px 20px -4px hsl(0 0% 0% / 0.08), 0 1px 3px hsl(0 0% 0% / 0.04);
+  }
+
+  .card-elevated:hover {
+    box-shadow: 0 8px 30px -4px hsl(0 0% 0% / 0.12), 0 2px 6px hsl(0 0% 0% / 0.06);
+  }
 }
