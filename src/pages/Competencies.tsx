@@ -17,7 +17,7 @@ export default function Competencies() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Competencia | null>(null);
   const [nome, setNome] = useState("");
-  const [eixo, setEixo] = useState<"desempenho" | "potencial">("desempenho");
+  const [eixo, setEixo] = useState<"desempenho" | "comportamento">("desempenho");
 
   const persist = (next: Competencia[]) => {
     setCompetencias(next);
@@ -114,13 +114,13 @@ export default function Competencies() {
               </div>
               <div>
                 <Label>Eixo</Label>
-                <Select value={eixo} onValueChange={(v) => setEixo(v as "desempenho" | "potencial")}>
+                <Select value={eixo} onValueChange={(v) => setEixo(v as "desempenho" | "comportamento")}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="desempenho">Desempenho</SelectItem>
-                    <SelectItem value="potencial">Potencial</SelectItem>
+                    <SelectItem value="comportamento">Comportamento</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

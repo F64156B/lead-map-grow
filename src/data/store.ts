@@ -3,7 +3,7 @@
 export interface Competencia {
   id: string;
   nome: string;
-  eixo: "desempenho" | "potencial";
+  eixo: "desempenho" | "comportamento";
   ordem: number;
 }
 
@@ -65,8 +65,8 @@ export interface LogMudanca {
 
 const COMPETENCIAS_INICIAIS: Competencia[] = [
   { id: "entrega-resultados", nome: "Entrega de Resultados (KPIs)", eixo: "desempenho", ordem: 1 },
-  { id: "cultura-valores", nome: "Cultura e Valores Adimax", eixo: "potencial", ordem: 2 },
-  { id: "gestao-pessoas", nome: "Gestão de Pessoas (Liderança)", eixo: "potencial", ordem: 3 },
+  { id: "cultura-valores", nome: "Cultura e Valores Adimax", eixo: "comportamento", ordem: 2 },
+  { id: "gestao-pessoas", nome: "Gestão de Pessoas (Liderança)", eixo: "comportamento", ordem: 3 },
   { id: "conhecimento-tecnico", nome: "Conhecimento Técnico", eixo: "desempenho", ordem: 4 },
 ];
 
@@ -239,7 +239,7 @@ const KEYS = {
   dataVersion: "adimax_data_version",
 };
 
-const CURRENT_DATA_VERSION = "3";
+const CURRENT_DATA_VERSION = "4";
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -376,7 +376,7 @@ export function isLiderAvaliado(lider: Lider, competencias: Competencia[]): bool
   return competencias.every((c) => lider.avaliacoes[c.id] !== undefined);
 }
 
-export function calcMedia(lider: Lider, competencias: Competencia[], eixo: "desempenho" | "potencial"): number {
+export function calcMedia(lider: Lider, competencias: Competencia[], eixo: "desempenho" | "comportamento"): number {
   const relevant = competencias.filter((c) => c.eixo === eixo);
   if (relevant.length === 0) return 0;
   const sum = relevant.reduce((acc, c) => acc + (lider.avaliacoes[c.id] || 0), 0);
