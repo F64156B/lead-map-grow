@@ -4,7 +4,7 @@ import { LogIn, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { login } from "@/data/store";
+import { login, getUsuarios } from "@/data/store";
 import dpaLogo from "@/assets/DPA.png";
 import adimaxLogo from "@/assets/Adimax.png";
 import { toast } from "@/hooks/use-toast";
@@ -15,6 +15,8 @@ export default function LoginPage() {
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
 
+  const totalUsuarios = getUsuarios().length;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
@@ -23,7 +25,7 @@ export default function LoginPage() {
       toast({ title: `Bem-vindo, ${usuario.nome}!` });
       navigate("/");
     } else {
-      setErro(`E-mail ou senha inválidos. (Tentativa: ${email.trim().toLowerCase()})`);
+      setErro(`E-mail ou senha inválidos. (Tentativa: ${email.trim().toLowerCase()}) — ${totalUsuarios} usuário(s) cadastrado(s)`);
     }
   };
 
@@ -81,6 +83,7 @@ export default function LoginPage() {
             <Button type="submit" className="w-full gap-2 h-11 text-base font-semibold shadow-md hover:shadow-lg" size="lg">
               <LogIn className="h-4 w-4" /> Entrar
             </Button>
+            <p className="text-xs text-muted-foreground text-center">{totalUsuarios} usuário(s) cadastrado(s) no sistema</p>
           </form>
 
           {/* Footer with Adimax logo */}

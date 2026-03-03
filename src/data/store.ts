@@ -292,10 +292,17 @@ function migrateLideres(lideres: any[]): Lider[] {
 function checkDataVersion() {
   const storedVersion = localStorage.getItem(KEYS.dataVersion);
   if (storedVersion !== CURRENT_DATA_VERSION) {
+    // Preservar usuários antes de limpar dados
+    const usuariosBackup = localStorage.getItem(KEYS.usuarios);
     // Clear old data to force reload with real data
     localStorage.removeItem(KEYS.lideres);
     localStorage.removeItem(KEYS.competencias);
     localStorage.setItem(KEYS.dataVersion, CURRENT_DATA_VERSION);
+    // Restaurar usuários preservados
+    if (usuariosBackup) {
+      localStorage.setItem(KEYS.usuarios, usuariosBackup);
+      console.log("[store] Usuários preservados após migração de versão");
+    }
   }
 }
 
@@ -307,7 +314,13 @@ checkDataVersion();
 // ========== USER MANAGEMENT ==========
 
 function getUsuariosCadastrados(): UsuarioCadastro[] {
-  return load(KEYS.usuarios, USUARIOS_INICIAIS);
+  const usuarios = load(KEYS.usuarios, USUARIOS_INICIAIS);
+  // Se não existe no localStorage, salvar imediatamente para garantir persistência
+  if (!localStorage.getItem(KEYS.usuarios)) {
+    save(KEYS.usuarios, usuarios);
+    console.log("[store] Usuários iniciais salvos no localStorage:", usuarios.length);
+  }
+  return usuarios;
 }
 
 function saveUsuariosCadastrados(usuarios: UsuarioCadastro[]) {
