@@ -10,7 +10,7 @@ interface Props {
 }
 
 const BOX_LABELS = [
-  ["Enigma", "Potencial Crescimento", "Alto Potencial"],
+  ["Enigma", "Comportamento Crescimento", "Alto Comportamento"],
   ["Questionável", "Mantenedor", "Forte Desempenho"],
   ["Insuficiente", "Eficaz", "Comprometido"],
 ];
@@ -19,10 +19,10 @@ export default function NineBoxChart({ lideres, competencias, onSelect, selected
   // Map each leader to x (0-1) and y (0-1) based on desempenho/potencial means
   const plotData = lideres.map((l) => {
     const desemp = calcMedia(l, competencias, "desempenho");
-    const potenc = calcMedia(l, competencias, "potencial");
+    const comport = calcMedia(l, competencias, "comportamento");
     // Scale from 1-3 to 0-1
     const x = (desemp - 1) / 2;
-    const y = (potenc - 1) / 2;
+    const y = (comport - 1) / 2;
     return { lider: l, x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) };
   });
 
@@ -84,7 +84,7 @@ export default function NineBoxChart({ lideres, competencias, onSelect, selected
         <span className="font-medium">Desempenho →</span>
       </div>
       <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-        <span>↑ Potencial</span>
+        <span>↑ Comportamento</span>
       </div>
 
       {/* Legend */}
