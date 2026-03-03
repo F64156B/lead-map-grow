@@ -4,7 +4,7 @@ import { LogIn, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { login, getUsuarios } from "@/data/store";
+import { supabase } from "@/integrations/supabase/client";
 import dpaLogo from "@/assets/DPA.png";
 import adimaxLogo from "@/assets/Adimax.png";
 import { toast } from "@/hooks/use-toast";
@@ -14,18 +14,41 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const totalUsuarios = getUsuarios().length;
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
-    const usuario = login(email, senha);
-    if (usuario) {
-      toast({ title: `Bem-vindo, ${usuario.nome}!` });
-      navigate("/");
-    } else {
-      setErro(`E-mail ou senha inválidos. (Tentativa: ${email.trim().toLowerCase()}) — ${totalUsuarios} usuário(s) cadastrado(s)`);
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password: senha,
+      });
+
+      if (error) {
+        setErro("E-mail ou senha inválidos.");
+        setLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        // Get user name from profile
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("nome")
+          .eq("id", data.user.id)
+          .single();
+
+        const nome = profile?.nome || data.user.email || "Usuário";
+        toast({ title: `Bem-vindo, ${nome}!` });
+        navigate("/");
+      }
+    } catch {
+      setErro("Erro ao conectar. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,10 +103,9 @@ export default function LoginPage() {
             {erro && (
               <p className="text-sm text-destructive font-medium">{erro}</p>
             )}
-            <Button type="submit" className="w-full gap-2 h-11 text-base font-semibold shadow-md hover:shadow-lg" size="lg">
-              <LogIn className="h-4 w-4" /> Entrar
+            <Button type="submit" className="w-full gap-2 h-11 text-base font-semibold shadow-md hover:shadow-lg" size="lg" disabled={loading}>
+              <LogIn className="h-4 w-4" /> {loading ? "Entrando..." : "Entrar"}
             </Button>
-            <p className="text-xs text-muted-foreground text-center">{totalUsuarios} usuário(s) cadastrado(s) no sistema</p>
           </form>
 
           {/* Footer with Adimax logo */}

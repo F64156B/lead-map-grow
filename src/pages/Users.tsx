@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { UserPlus, KeyRound, Trash2, Shield, User } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { getUsuarios, criarUsuario, resetarSenhaUsuario, excluirUsuario, getUsuarioLogado } from "@/data/store";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
+interface UserInfo {
+  id: string;
+  nome: string;
+  email: string;
+  role: "admin" | "usuario";
+}
+
 export default function UsersPage() {
-  const [refreshKey, setRefreshKey] = useState(0);
-  const usuarios = useMemo(() => getUsuarios(), [refreshKey]);
-  const logado = getUsuarioLogado();
+  const [usuarios, setUsuarios] = useState<UserInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Create user state
   const [showCreate, setShowCreate] = useState(false);
@@ -25,10 +32,42 @@ export default function UsersPage() {
   const [novoRole, setNovoRole] = useState<"admin" | "usuario">("usuario");
 
   // Reset password state
-  const [resetEmail, setResetEmail] = useState<string | null>(null);
+  const [resetUserId, setResetUserId] = useState<string | null>(null);
+  const [resetUserName, setResetUserName] = useState("");
+  const [resetUserEmail, setResetUserEmail] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
 
-  const handleCreate = () => {
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      setCurrentUserId(session.user.id);
+
+      const { data, error } = await supabase.functions.invoke("manage-users", {
+        body: { action: "list" },
+      });
+
+      if (error) {
+        console.error("Error fetching users:", error);
+        toast({ title: "Erro ao carregar usuários", variant: "destructive" });
+        return;
+      }
+
+      setUsuarios(data.users || []);
+    } catch (err) {
+      console.error("Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const handleCreate = async () => {
     if (!novoNome.trim() || !novoEmail.trim() || !novoSenha) {
       toast({ title: "Preencha todos os campos", variant: "destructive" });
       return;
@@ -37,41 +76,57 @@ export default function UsersPage() {
       toast({ title: "Senha muito curta", description: "A senha deve ter no mínimo 4 caracteres.", variant: "destructive" });
       return;
     }
-    const result = criarUsuario({ nome: novoNome.trim(), email: novoEmail.trim(), senha: novoSenha, role: novoRole });
-    if (result.ok) {
-      toast({ title: "Usuário criado!", description: `Login: ${novoEmail.trim().toLowerCase()} | Senha: ${novoSenha}` });
-      setNovoNome(""); setNovoEmail(""); setNovoSenha(""); setNovoRole("usuario");
-      setShowCreate(false);
-      setRefreshKey(k => k + 1);
-    } else {
-      toast({ title: "Erro", description: result.erro, variant: "destructive" });
+
+    const { data, error } = await supabase.functions.invoke("manage-users", {
+      body: { action: "create", email: novoEmail.trim(), password: novoSenha, nome: novoNome.trim(), role: novoRole },
+    });
+
+    if (error || data?.error) {
+      toast({ title: "Erro", description: data?.error || error?.message, variant: "destructive" });
+      return;
     }
+
+    toast({ title: "Usuário criado!", description: `Login: ${novoEmail.trim().toLowerCase()}` });
+    setNovoNome(""); setNovoEmail(""); setNovoSenha(""); setNovoRole("usuario");
+    setShowCreate(false);
+    fetchUsers();
   };
 
-  const handleResetPassword = () => {
-    if (!resetEmail || !novaSenha) return;
+  const handleResetPassword = async () => {
+    if (!resetUserId || !novaSenha) return;
     if (novaSenha.length < 4) {
       toast({ title: "Erro", description: "A senha deve ter no mínimo 4 caracteres.", variant: "destructive" });
       return;
     }
-    const result = resetarSenhaUsuario(resetEmail, novaSenha);
-    if (result.ok) {
-      toast({ title: "Senha alterada!", description: `Senha de ${resetEmail} redefinida para: ${novaSenha}` });
-      setResetEmail(null);
-      setNovaSenha("");
-    } else {
-      toast({ title: "Erro", description: result.erro, variant: "destructive" });
+
+    const { data, error } = await supabase.functions.invoke("manage-users", {
+      body: { action: "reset-password", userId: resetUserId, newPassword: novaSenha },
+    });
+
+    if (error || data?.error) {
+      toast({ title: "Erro", description: data?.error || error?.message, variant: "destructive" });
+      return;
     }
+
+    toast({ title: "Senha alterada!", description: `Senha de ${resetUserEmail} foi redefinida.` });
+    setResetUserId(null);
+    setResetUserName("");
+    setResetUserEmail("");
+    setNovaSenha("");
   };
 
-  const handleDelete = (email: string) => {
-    const result = excluirUsuario(email);
-    if (result.ok) {
-      toast({ title: "Usuário excluído", description: `${email} foi removido.` });
-      setRefreshKey(k => k + 1);
-    } else {
-      toast({ title: "Erro", description: result.erro, variant: "destructive" });
+  const handleDelete = async (userId: string, email: string) => {
+    const { data, error } = await supabase.functions.invoke("manage-users", {
+      body: { action: "delete", userId },
+    });
+
+    if (error || data?.error) {
+      toast({ title: "Erro", description: data?.error || error?.message, variant: "destructive" });
+      return;
     }
+
+    toast({ title: "Usuário excluído", description: `${email} foi removido.` });
+    fetchUsers();
   };
 
   return (
@@ -141,77 +196,100 @@ export default function UsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {usuarios.map((user, index) => {
-                const isCurrentUser = logado?.email.toLowerCase() === user.email.toLowerCase();
-                return (
-                  <TableRow key={user.email} className={index % 2 === 1 ? "bg-muted/20" : ""}>
-                    <TableCell className="font-medium">
-                      {user.nome}
-                      {isCurrentUser && (
-                        <Badge variant="outline" className="ml-2 text-xs">Você</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{user.email}</TableCell>
-                    <TableCell className="text-center">
-                      <Badge className={user.role === "admin" ? "bg-primary text-primary-foreground gap-1" : "bg-secondary text-secondary-foreground gap-1"}>
-                        {user.role === "admin" ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                        {user.role === "admin" ? "Admin" : "Usuário"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        {/* Reset Password */}
-                        <Dialog open={resetEmail === user.email} onOpenChange={(open) => { if (!open) { setResetEmail(null); setNovaSenha(""); } }}>
-                          <DialogTrigger asChild>
-                            <Button size="sm" variant="outline" className="gap-1" onClick={() => setResetEmail(user.email)}>
-                              <KeyRound className="h-3.5 w-3.5" /> Senha
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Redefinir Senha</DialogTitle>
-                              <DialogDescription>Nova senha para {user.nome} ({user.email})</DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-2 py-2">
-                              <label className="text-sm font-medium">Nova Senha</label>
-                              <Input type="text" placeholder="Nova senha (mín. 4 caracteres)" value={novaSenha} onChange={e => setNovaSenha(e.target.value)} />
-                            </div>
-                            <DialogFooter>
-                              <Button variant="outline" onClick={() => { setResetEmail(null); setNovaSenha(""); }}>Cancelar</Button>
-                              <Button onClick={handleResetPassword} className="gap-2"><KeyRound className="h-4 w-4" /> Alterar</Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-
-                        {/* Delete */}
-                        {!isCurrentUser && (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Excluir usuário?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  {user.nome} ({user.email}) perderá o acesso ao sistema.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(user.email)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                  Excluir
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                    Carregando...
+                  </TableCell>
+                </TableRow>
+              ) : usuarios.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                    Nenhum usuário cadastrado.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                usuarios.map((user, index) => {
+                  const isCurrentUser = currentUserId === user.id;
+                  return (
+                    <TableRow key={user.id} className={index % 2 === 1 ? "bg-muted/20" : ""}>
+                      <TableCell className="font-medium">
+                        {user.nome}
+                        {isCurrentUser && (
+                          <Badge variant="outline" className="ml-2 text-xs">Você</Badge>
                         )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                      <TableCell className="text-center">
+                        <Badge className={user.role === "admin" ? "bg-primary text-primary-foreground gap-1" : "bg-secondary text-secondary-foreground gap-1"}>
+                          {user.role === "admin" ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
+                          {user.role === "admin" ? "Admin" : "Usuário"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {/* Reset Password */}
+                          <Dialog
+                            open={resetUserId === user.id}
+                            onOpenChange={(open) => {
+                              if (!open) { setResetUserId(null); setNovaSenha(""); setResetUserName(""); setResetUserEmail(""); }
+                            }}
+                          >
+                            <DialogTrigger asChild>
+                              <Button size="sm" variant="outline" className="gap-1" onClick={() => {
+                                setResetUserId(user.id);
+                                setResetUserName(user.nome);
+                                setResetUserEmail(user.email);
+                              }}>
+                                <KeyRound className="h-3.5 w-3.5" /> Senha
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Redefinir Senha</DialogTitle>
+                                <DialogDescription>Nova senha para {user.nome} ({user.email})</DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-2 py-2">
+                                <label className="text-sm font-medium">Nova Senha</label>
+                                <Input type="text" placeholder="Nova senha (mín. 4 caracteres)" value={novaSenha} onChange={e => setNovaSenha(e.target.value)} />
+                              </div>
+                              <DialogFooter>
+                                <Button variant="outline" onClick={() => { setResetUserId(null); setNovaSenha(""); }}>Cancelar</Button>
+                                <Button onClick={handleResetPassword} className="gap-2"><KeyRound className="h-4 w-4" /> Alterar</Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* Delete */}
+                          {!isCurrentUser && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Excluir usuário?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    {user.nome} ({user.email}) perderá o acesso ao sistema.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDelete(user.id, user.email)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </div>
