@@ -376,16 +376,23 @@ export function excluirUsuario(email: string): { ok: boolean; erro?: string } {
 export function login(email: string, senha: string): Usuario | null {
   const emailLimpo = email.trim().toLowerCase();
   const usuarios = getUsuariosCadastrados();
-  console.log("[login] Tentando:", emailLimpo, "| Usuários cadastrados:", usuarios.map(u => u.email));
+  console.log("[login] Tentando:", emailLimpo, "| Senha digitada:", senha);
+  console.log("[login] Usuários cadastrados:", usuarios.map(u => ({ email: u.email, senha: u.senha, nome: u.nome })));
   const user = usuarios.find(
     (u) => u.email === emailLimpo && u.senha === senha
   );
   if (user) {
+    console.log("[login] SUCESSO para:", emailLimpo);
     const usuario: Usuario = { email: user.email, nome: user.nome, role: user.role };
     save(KEYS.usuarioLogado, usuario);
     return usuario;
   }
-  console.log("[login] Falhou para:", emailLimpo);
+  const match = usuarios.find(u => u.email === emailLimpo);
+  if (match) {
+    console.log("[login] Email encontrado mas senha errada. Esperada:", match.senha, "| Digitada:", senha);
+  } else {
+    console.log("[login] Email NÃO encontrado:", emailLimpo);
+  }
   return null;
 }
 

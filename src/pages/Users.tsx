@@ -50,9 +50,13 @@ export default function UsersPage() {
 
   const handleResetPassword = () => {
     if (!resetEmail || !novaSenha) return;
+    if (novaSenha.length < 4) {
+      toast({ title: "Erro", description: "A senha deve ter no mínimo 4 caracteres.", variant: "destructive" });
+      return;
+    }
     const result = resetarSenhaUsuario(resetEmail, novaSenha);
     if (result.ok) {
-      toast({ title: "Senha alterada!", description: `Senha de ${resetEmail} foi redefinida.` });
+      toast({ title: "Senha alterada!", description: `Senha de ${resetEmail} redefinida para: ${novaSenha}` });
       setResetEmail(null);
       setNovaSenha("");
     } else {
@@ -170,7 +174,7 @@ export default function UsersPage() {
                             </DialogHeader>
                             <div className="space-y-2 py-2">
                               <label className="text-sm font-medium">Nova Senha</label>
-                              <Input type="password" placeholder="Nova senha" value={novaSenha} onChange={e => setNovaSenha(e.target.value)} />
+                              <Input type="text" placeholder="Nova senha (mín. 4 caracteres)" value={novaSenha} onChange={e => setNovaSenha(e.target.value)} />
                             </div>
                             <DialogFooter>
                               <Button variant="outline" onClick={() => { setResetEmail(null); setNovaSenha(""); }}>Cancelar</Button>
