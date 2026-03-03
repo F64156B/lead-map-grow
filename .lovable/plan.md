@@ -1,77 +1,36 @@
 
-# Redesign Visual - UX Profissional com Logos Adimax
 
-## Visao Geral
+# Fix: Login de Novos Usuarios Nao Funciona
 
-Melhorar a experiencia visual do sistema inteiro, tornando-o mais profissional, atrativo e alinhado a identidade Adimax. As logos DPA e Adimax serao usadas estrategicamente em pontos-chave da interface.
+## Diagnostico
 
----
+Analisei o codigo em `store.ts` e `Users.tsx`. A logica de `criarUsuario` e `login` esta correta (ambas usam lowercase no email, comparam senha diretamente). O problema mais provavel e:
 
-## 1. Tela de Login - Impacto Visual
+1. **localStorage limpo no rebuild**: Quando o Lovable aplica mudancas, o preview recarrega e o localStorage pode ser perdido — os usuarios criados somem, mas o admin inicial (`pedro.souza@adimax.com.br`) volta porque e o fallback em `USUARIOS_INICIAIS`.
+2. **Senha digitada errada na criacao**: O campo `type="password"` nao permite ver o que foi digitado.
 
-**Antes:** Card simples com fundo cinza claro, sem hierarquia visual forte.
+## Solucao
 
-**Depois:**
-- Fundo com gradiente sutil laranja-para-branco (do canto inferior esquerdo)
-- Card com sombra mais pronunciada (`shadow-xl`) e bordas arredondadas maiores
-- Logo DPA maior (h-20) como elemento hero, com espaco generoso acima
-- Titulo "Calibracao Adimax" em tamanho maior com subtitulo estilizado
-- Logo Adimax no rodape do card, separada por uma linha fina
-- Inputs com icones internos (Mail, Lock) e foco com borda laranja
-- Botao "Entrar" com efeito hover mais forte e sombra
-- Rodape discreto: "Powered by DPA" ou copyright
+### 1. Mostrar senha ao criar usuario (`src/pages/Users.tsx`)
+- Trocar o input de senha na criacao para `type="text"` (ou adicionar botao toggle de visibilidade)
+- Mostra ao admin exatamente qual senha esta sendo definida
 
----
+### 2. Persistencia robusta (`src/data/store.ts`)
+- Na funcao `checkDataVersion`, garantir que `usuarios` NAO seja limpo ao mudar a versao (ja esta assim, confirmar)
+- Adicionar os usuarios criados na propria lista `USUARIOS_INICIAIS` como fallback — nao e possivel via codigo, mas podemos exibir feedback melhor
 
-## 2. Header (Layout.tsx) - Branding Profissional
+### 3. Feedback visual no login (`src/pages/Login.tsx`)
+- Ao falhar o login, exibir tambem o email que foi tentado (para o usuario perceber erros de digitacao)
+- Adicionar `console.log` temporario na funcao `login` para debug (listar emails cadastrados)
 
-**Antes:** Icone generico de clipboard no header.
+### 4. Validacao na criacao (`src/pages/Users.tsx`)
+- Validar tamanho minimo da senha (ex: 4 caracteres)
+- Trim no email e nome antes de salvar
+- Toast de sucesso mostrando email e senha criados para confirmacao
 
-**Depois:**
-- Substituir icone ClipboardCheck pela **logo Adimax** (h-8) no canto esquerdo
-- Adicionar uma faixa laranja fina (2px) no topo do header como assinatura visual
-- Navegacao com estilo pill mais refinado (rounded-full, transicoes suaves)
-- Area do usuario com avatar circular com iniciais (ex: "PS" para Pedro Souza)
-- Separador visual mais elegante entre nav e usuario
+## Arquivos afetados
 
----
+1. **`src/pages/Users.tsx`** — Toggle de visibilidade da senha, trim nos inputs, toast com credenciais
+2. **`src/pages/Login.tsx`** — Feedback melhorado no erro de login
+3. **`src/data/store.ts`** — Trim no email em `criarUsuario` e `login`
 
-## 3. Pagina de Lideres (Index.tsx) - Cards e Hierarquia
-
-**Antes:** Tabela simples, titulo basico.
-
-**Depois:**
-- Banner de boas-vindas no topo com gradiente laranja sutil e logo DPA pequena
-- Cards de estatisticas rapidas acima da tabela (Total Lideres, Avaliados, Pendentes) com icones e cores
-- Tabela com hover row mais pronunciado, linhas zebradas sutis
-- Badges de status com icones ao inves de emojis (CheckCircle verde, Clock amarelo)
-- Botoes de acao com tooltips e cores mais distintas
-
----
-
-## 4. Pagina de Calibracao (Calibration.tsx) - Experiencia Guiada
-
-- Barra de progresso no topo mostrando quantas competencias ja foram avaliadas
-- Cards de competencia com hover elevado (shadow on hover)
-- Botoes de nota (1, 2, 3) maiores com animacao de selecao (scale + shadow)
-- Header do lider com uma faixa colorida baseada na area (cor da area)
-
----
-
-## 5. Estilos Globais (index.css)
-
-- Adicionar transicoes globais suaves para hover e focus
-- Tipografia: usar font-weight mais variado (light para subtextos, bold para titulos)
-- Sombras customizadas mais sofisticadas para cards
-
----
-
-## Arquivos Afetados
-
-1. **`src/pages/Login.tsx`** — Redesign completo do layout visual (gradiente, tamanhos, icones nos inputs, rodape)
-2. **`src/components/Layout.tsx`** — Logo Adimax no header, faixa laranja, avatar com iniciais, navegacao refinada
-3. **`src/pages/Index.tsx`** — Banner de boas-vindas, cards de estatisticas, badges sem emoji, zebra striping
-4. **`src/pages/Calibration.tsx`** — Barra de progresso, faixa de area, hover nos cards
-5. **`src/index.css`** — Transicoes globais, sombras customizadas
-
-Nenhuma dependencia nova sera instalada. Todas as melhorias usam Tailwind CSS existente.
