@@ -10,7 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { getLideres, getCompetencias, isLiderAvaliado, getAreas, resetCalibracaoLider, getUsuarioLogado } from "@/data/store";
+import { getLideres, getCompetencias, isLiderAvaliado, getAreas, resetCalibracaoLider } from "@/data/store";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { toast } from "@/hooks/use-toast";
 import dpaLogo from "@/assets/DPA.png";
 
@@ -23,7 +24,7 @@ export default function Index() {
   const lideres = useMemo(() => getLideres(), [refreshKey]);
   const competencias = getCompetencias();
   const areas = useMemo(() => getAreas(lideres), [lideres]);
-  const usuario = getUsuarioLogado();
+  const { user: usuario } = useCurrentUser();
 
   const avaliados = useMemo(() => lideres.filter(l => isLiderAvaliado(l, competencias)).length, [lideres, competencias]);
   const pendentes = lideres.length - avaliados;

@@ -1,8 +1,9 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Users, BarChart3, Settings, FileText, LogOut, UserCog } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { getUsuarioLogado, logout } from "@/data/store";
+import { supabase } from "@/integrations/supabase/client";
 import adimaxLogo from "@/assets/Adimax.png";
 
 const NAV_ITEMS = [
@@ -20,10 +21,25 @@ function getInitials(nome: string): string {
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const usuario = getUsuarioLogado();
+  const [userName, setUserName] = useState("");
 
-  const handleLogout = () => {
-    logout();
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("nome")
+          .eq("id", session.user.id)
+          .single();
+        setUserName(profile?.nome || session.user.email || "");
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate("/login");
   };
 
@@ -60,12 +76,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </Link>
               ))}
             </nav>
-            {usuario && (
+            {userName && (
               <div className="flex items-center gap-2 border-l pl-3 ml-1">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                  {getInitials(usuario.nome)}
+                  {getInitials(userName)}
                 </div>
-                <span className="hidden text-sm font-medium text-foreground lg:inline">{usuario.nome}</span>
+                <span className="hidden text-sm font-medium text-foreground lg:inline">{userName}</span>
                 <Button variant="ghost" size="icon" onClick={handleLogout} title="Sair" className="h-8 w-8">
                   <LogOut className="h-4 w-4" />
                 </Button>
