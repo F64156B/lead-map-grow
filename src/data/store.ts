@@ -319,12 +319,21 @@ export function getUsuarios(): UsuarioCadastro[] {
 }
 
 export function criarUsuario(dados: UsuarioCadastro): { ok: boolean; erro?: string } {
+  const emailLimpo = dados.email.trim().toLowerCase();
+  const nomeLimpo = dados.nome.trim();
+  if (!emailLimpo || !nomeLimpo || !dados.senha) {
+    return { ok: false, erro: "Preencha todos os campos." };
+  }
+  if (dados.senha.length < 4) {
+    return { ok: false, erro: "A senha deve ter no mínimo 4 caracteres." };
+  }
   const usuarios = getUsuariosCadastrados();
-  if (usuarios.some(u => u.email.toLowerCase() === dados.email.toLowerCase())) {
+  if (usuarios.some(u => u.email === emailLimpo)) {
     return { ok: false, erro: "E-mail já cadastrado." };
   }
-  usuarios.push({ ...dados, email: dados.email.toLowerCase() });
+  usuarios.push({ ...dados, email: emailLimpo, nome: nomeLimpo });
   saveUsuariosCadastrados(usuarios);
+  console.log("[store] Usuário criado:", emailLimpo, "| Total:", usuarios.length);
   return { ok: true };
 }
 
@@ -352,15 +361,18 @@ export function excluirUsuario(email: string): { ok: boolean; erro?: string } {
 // ========== AUTH ==========
 
 export function login(email: string, senha: string): Usuario | null {
+  const emailLimpo = email.trim().toLowerCase();
   const usuarios = getUsuariosCadastrados();
+  console.log("[login] Tentando:", emailLimpo, "| Usuários cadastrados:", usuarios.map(u => u.email));
   const user = usuarios.find(
-    (u) => u.email.toLowerCase() === email.toLowerCase() && u.senha === senha
+    (u) => u.email === emailLimpo && u.senha === senha
   );
   if (user) {
     const usuario: Usuario = { email: user.email, nome: user.nome, role: user.role };
     save(KEYS.usuarioLogado, usuario);
     return usuario;
   }
+  console.log("[login] Falhou para:", emailLimpo);
   return null;
 }
 

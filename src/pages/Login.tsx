@@ -23,7 +23,7 @@ export default function LoginPage() {
       toast({ title: `Bem-vindo, ${usuario.nome}!` });
       navigate("/");
     } else {
-      setErro("E-mail ou senha inválidos.");
+      setErro(`E-mail ou senha inválidos. (Tentativa: ${email.trim().toLowerCase()})`);
     }
   };
 

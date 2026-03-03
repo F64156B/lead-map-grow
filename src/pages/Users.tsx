@@ -29,13 +29,17 @@ export default function UsersPage() {
   const [novaSenha, setNovaSenha] = useState("");
 
   const handleCreate = () => {
-    if (!novoNome || !novoEmail || !novoSenha) {
+    if (!novoNome.trim() || !novoEmail.trim() || !novoSenha) {
       toast({ title: "Preencha todos os campos", variant: "destructive" });
       return;
     }
-    const result = criarUsuario({ nome: novoNome, email: novoEmail, senha: novoSenha, role: novoRole });
+    if (novoSenha.length < 4) {
+      toast({ title: "Senha muito curta", description: "A senha deve ter no mínimo 4 caracteres.", variant: "destructive" });
+      return;
+    }
+    const result = criarUsuario({ nome: novoNome.trim(), email: novoEmail.trim(), senha: novoSenha, role: novoRole });
     if (result.ok) {
-      toast({ title: "Usuário criado!", description: `${novoNome} adicionado com sucesso.` });
+      toast({ title: "Usuário criado!", description: `Login: ${novoEmail.trim().toLowerCase()} | Senha: ${novoSenha}` });
       setNovoNome(""); setNovoEmail(""); setNovoSenha(""); setNovoRole("usuario");
       setShowCreate(false);
       setRefreshKey(k => k + 1);
@@ -98,7 +102,7 @@ export default function UsersPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Senha</label>
-                  <Input type="password" placeholder="Senha inicial" value={novoSenha} onChange={e => setNovoSenha(e.target.value)} />
+                  <Input type="text" placeholder="Senha inicial (visível)" value={novoSenha} onChange={e => setNovoSenha(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Perfil</label>
