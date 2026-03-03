@@ -1,36 +1,36 @@
 
 
-# Fix: Login de Novos Usuarios Nao Funciona
+# Diagnóstico: Login de Novos Usuários
 
-## Diagnostico
+## Causa Raiz Identificada
 
-Analisei o codigo em `store.ts` e `Users.tsx`. A logica de `criarUsuario` e `login` esta correta (ambas usam lowercase no email, comparam senha diretamente). O problema mais provavel e:
+O sistema usa **localStorage** para persistir usuários. Quando o código é alterado no Lovable, o preview reconstrói e o localStorage do iframe é **limpo**. Isso significa que:
 
-1. **localStorage limpo no rebuild**: Quando o Lovable aplica mudancas, o preview recarrega e o localStorage pode ser perdido — os usuarios criados somem, mas o admin inicial (`pedro.souza@adimax.com.br`) volta porque e o fallback em `USUARIOS_INICIAIS`.
-2. **Senha digitada errada na criacao**: O campo `type="password"` nao permite ver o que foi digitado.
+- Usuários criados **antes de uma alteração de código** desaparecem
+- Apenas `pedro.souza@adimax.com.br` (do `USUARIOS_INICIAIS`) sobrevive, pois é o fallback no código
 
-## Solucao
+Além disso, se `CURRENT_DATA_VERSION` mudar (ex: de "3" para "4"), a função `checkDataVersion` limpa dados — embora atualmente não limpe `usuarios`, qualquer rebuild pode zerar o localStorage inteiro.
 
-### 1. Mostrar senha ao criar usuario (`src/pages/Users.tsx`)
-- Trocar o input de senha na criacao para `type="text"` (ou adicionar botao toggle de visibilidade)
-- Mostra ao admin exatamente qual senha esta sendo definida
+## Solução
 
-### 2. Persistencia robusta (`src/data/store.ts`)
-- Na funcao `checkDataVersion`, garantir que `usuarios` NAO seja limpo ao mudar a versao (ja esta assim, confirmar)
-- Adicionar os usuarios criados na propria lista `USUARIOS_INICIAIS` como fallback — nao e possivel via codigo, mas podemos exibir feedback melhor
+### 1. Proteger usuários no checkDataVersion (`src/data/store.ts`)
+- Antes de limpar dados na migração de versão, **preservar** a lista de usuários:
+  - Ler `KEYS.usuarios` antes da limpeza
+  - Restaurá-los após o reset de versão
+- Isso garante que mesmo após mudanças de versão, os usuários criados persistam
 
-### 3. Feedback visual no login (`src/pages/Login.tsx`)
-- Ao falhar o login, exibir tambem o email que foi tentado (para o usuario perceber erros de digitacao)
-- Adicionar `console.log` temporario na funcao `login` para debug (listar emails cadastrados)
+### 2. Adicionar logs visuais no login (`src/pages/Login.tsx`)
+- Ao falhar o login, exibir no toast (além do erro) quantos usuários estão cadastrados no sistema
+- Isso ajuda o admin a perceber se os dados foram perdidos
 
-### 4. Validacao na criacao (`src/pages/Users.tsx`)
-- Validar tamanho minimo da senha (ex: 4 caracteres)
-- Trim no email e nome antes de salvar
-- Toast de sucesso mostrando email e senha criados para confirmacao
+### 3. Pré-carregar usuários criados se localStorage estiver vazio (`src/data/store.ts`)
+- Na função `getUsuariosCadastrados`, se o localStorage retorna apenas o fallback (1 usuário), salvar imediatamente os `USUARIOS_INICIAIS` no localStorage para garantir a persistência base
 
-## Arquivos afetados
+### 4. Botão "Ver Usuários Cadastrados" na tela de login (debug) (`src/pages/Login.tsx`)
+- Adicionar um texto discreto abaixo do botão Entrar mostrando a contagem de usuários cadastrados
+- Remover depois que o sistema estiver estável
 
-1. **`src/pages/Users.tsx`** — Toggle de visibilidade da senha, trim nos inputs, toast com credenciais
-2. **`src/pages/Login.tsx`** — Feedback melhorado no erro de login
-3. **`src/data/store.ts`** — Trim no email em `criarUsuario` e `login`
+## Arquivos Afetados
+1. `src/data/store.ts` — Proteger usuarios no checkDataVersion, inicializar localStorage
+2. `src/pages/Login.tsx` — Feedback melhorado com contagem de usuários
 
