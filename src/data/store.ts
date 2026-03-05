@@ -5,6 +5,7 @@ export interface Competencia {
   nome: string;
   eixo: "desempenho" | "comportamento";
   ordem: number;
+  descricao?: string;
 }
 
 export interface FormacaoAcademica {
@@ -64,10 +65,18 @@ export interface LogMudanca {
 // ========== INITIAL DATA ==========
 
 const COMPETENCIAS_INICIAIS: Competencia[] = [
-  { id: "entrega-resultados", nome: "Entrega de Resultados (KPIs)", eixo: "desempenho", ordem: 1 },
-  { id: "cultura-valores", nome: "Cultura e Valores Adimax", eixo: "comportamento", ordem: 2 },
-  { id: "gestao-pessoas", nome: "Gestão de Pessoas (Liderança)", eixo: "comportamento", ordem: 3 },
-  { id: "conhecimento-tecnico", nome: "Conhecimento Técnico", eixo: "desempenho", ordem: 4 },
+  { id: "cultura-qualidade", nome: "Cultura de Qualidade e Boas Práticas", eixo: "desempenho", ordem: 1, descricao: "Aplicação prática e respeito rigoroso aos preceitos de Qualidade (Sistema de Gestão) e disseminação do 5S e BPF (Boas Práticas de Fabricação)." },
+  { id: "seguranca-ma-saude", nome: "Segurança, Meio Ambiente e Saúde (SMA)", eixo: "desempenho", ordem: 2, descricao: "Domínio, cumprimento e fiscalização diária dos Procedimentos de SMA, garantindo uma operação com zero acidentes." },
+  { id: "dominio-tecnico", nome: "Domínio Técnico e Operacional", eixo: "desempenho", ordem: 3, descricao: "Domínio técnico do Conhecimento do Processo Produtivo e amplo entendimento do Portfólio de Produtos." },
+  { id: "visao-sistemica", nome: "Visão Sistêmica e Solução de Problemas", eixo: "desempenho", ordem: 4, descricao: "Conhecimento sobre os Setores de Apoio (sabendo como interagir) e atuação analítica e propositiva na Resolução de Problemas." },
+  { id: "excelencia-rotina", nome: "Excelência na Gestão de Rotina", eixo: "desempenho", ordem: 5, descricao: "Condução adequada da Gestão de Rotina (ex: troca de turno), aplicação da Gestão de Tempo e cumprimento da Rotina da Liderança." },
+  { id: "admin-pessoal", nome: "Administração de Pessoal e Conformidade", eixo: "desempenho", ordem: 6, descricao: "Execução correta dos Processos de Gestão de Pessoas (férias, ponto) e atenção à Legislação Trabalhista (ex: regras de equiparação salarial)." },
+  { id: "atracao-talentos", nome: "Atração e Integração de Talentos", eixo: "desempenho", ordem: 7, descricao: "Avaliação de currículos durante o Recrutamento e Seleção e condução de um Onboarding (Interno) estruturado para mudanças de cargo." },
+  { id: "desenvolvimento-equipe", nome: "Desenvolvimento e Performance da Equipe", eixo: "desempenho", ordem: 8, descricao: "Realização de Assessment do Time, uso da Matriz de Habilidade e Versatilidade, orientação sobre Trilha de Carreira e aplicação de Técnicas de Feedback." },
+  { id: "inteligencia-relacional", nome: "Inteligência Relacional e Comunicação", eixo: "comportamento", ordem: 9, descricao: "Utilização de Comunicação Assertiva e Não Violenta, criação de Conexão com o Time (empatia) e atuação neutra na Gestão de Conflitos." },
+  { id: "clima-engajamento", nome: "Gestão de Clima, Engajamento e Diversidade", eixo: "comportamento", ordem: 10, descricao: "Impulso ao Engajamento (utilizando o programa Alegra) e promoção da Diversidade, ensinando a equipe a lidar com as diferenças com respeito." },
+  { id: "autogestao-emocional", nome: "Autogestão e Maturidade Emocional", eixo: "comportamento", ordem: 11, descricao: "Demonstração de Autoconhecimento (reconhecendo limites e fortalezas) e manutenção da Inteligência Emocional em situações de alto estresse." },
+  { id: "alinhamento-cultural", nome: "Alinhamento Cultural Adimax", eixo: "comportamento", ordem: 12, descricao: "Atuação pautada pela Ética, Transparência e Gestão por Princípio, demonstração de Senso de Dono (Accountability) e Orgulho de Pertencer." },
 ];
 
 export interface UsuarioCadastro {
@@ -239,7 +248,7 @@ const KEYS = {
   dataVersion: "adimax_data_version",
 };
 
-const CURRENT_DATA_VERSION = "4";
+const CURRENT_DATA_VERSION = "5";
 
 function load<T>(key: string, fallback: T): T {
   try {
