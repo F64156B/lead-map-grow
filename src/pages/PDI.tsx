@@ -20,9 +20,10 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
 };
 
 const NOTA_LABELS: Record<number, string> = {
-  1: "Abaixo do Esperado",
-  2: "Atende",
-  3: "Supera",
+  1: "Necessita Conhecer",
+  2: "Apto com Acompanhamento",
+  3: "Apto com Autonomia",
+  4: "Apto a Multiplicar",
 };
 
 // PDI List page (no :id param)
@@ -91,7 +92,7 @@ function PDIDetail() {
   });
   const pontosFortes = competencias.filter((c) => {
     const nota = lider.avaliacoes[c.id];
-    return nota === 3;
+    return nota !== undefined && nota >= 3;
   });
   const naoAvaliadas = competencias.filter((c) => lider.avaliacoes[c.id] === undefined);
 

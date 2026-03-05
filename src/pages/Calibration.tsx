@@ -11,9 +11,10 @@ import { getLider, getCompetencias, saveLider, isLiderAvaliado, resetCalibracaoL
 import { toast } from "@/hooks/use-toast";
 
 const NOTA_LABELS: Record<number, { label: string; emoji: string; color: string }> = {
-  1: { label: "Abaixo do Esperado", emoji: "🔴", color: "border-destructive bg-destructive/10 text-destructive" },
-  2: { label: "Atende", emoji: "🟡", color: "border-warning bg-warning/10 text-warning-foreground" },
-  3: { label: "Supera", emoji: "🟢", color: "border-success bg-success/10 text-success" },
+  1: { label: "Necessita Conhecer", emoji: "🔴", color: "border-destructive bg-destructive/10 text-destructive" },
+  2: { label: "Apto com Acompanhamento", emoji: "🟠", color: "border-warning bg-warning/10 text-warning-foreground" },
+  3: { label: "Apto com Autonomia", emoji: "🔵", color: "border-blue-500 bg-blue-500/10 text-blue-700 dark:text-blue-400" },
+  4: { label: "Apto a Multiplicar", emoji: "🟢", color: "border-success bg-success/10 text-success" },
 };
 
 export default function Calibration() {
@@ -189,8 +190,8 @@ export default function Calibration() {
                       <p className="text-xs text-muted-foreground mt-1">{comp.descricao}</p>
                     )}
                   </div>
-                  <div className="mt-3 grid grid-cols-3 gap-2">
-                    {[1, 2, 3].map((nota) => {
+                  <div className="mt-3 grid grid-cols-4 gap-2">
+                    {[1, 2, 3, 4].map((nota) => {
                       const info = NOTA_LABELS[nota];
                       const isSelected = selected === nota;
                       return (
