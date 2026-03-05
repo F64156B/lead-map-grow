@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, Info } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getCompetencias, saveCompetencias } from "@/data/store";
 import type { Competencia } from "@/data/store";
 import { toast } from "@/hooks/use-toast";
@@ -18,6 +20,7 @@ export default function Competencies() {
   const [editing, setEditing] = useState<Competencia | null>(null);
   const [nome, setNome] = useState("");
   const [eixo, setEixo] = useState<"desempenho" | "comportamento">("desempenho");
+  const [descricao, setDescricao] = useState("");
 
   const persist = (next: Competencia[]) => {
     setCompetencias(next);
@@ -28,6 +31,7 @@ export default function Competencies() {
     setEditing(null);
     setNome("");
     setEixo("desempenho");
+    setDescricao("");
     setDialogOpen(true);
   };
 
@@ -35,13 +39,14 @@ export default function Competencies() {
     setEditing(c);
     setNome(c.nome);
     setEixo(c.eixo);
+    setDescricao(c.descricao || "");
     setDialogOpen(true);
   };
 
   const handleSave = () => {
     if (!nome.trim()) return;
     if (editing) {
-      persist(competencias.map((c) => (c.id === editing.id ? { ...c, nome, eixo } : c)));
+      persist(competencias.map((c) => (c.id === editing.id ? { ...c, nome, eixo, descricao: descricao || undefined } : c)));
       toast({ title: "Competência atualizada" });
     } else {
       const newComp: Competencia = {
@@ -49,6 +54,7 @@ export default function Competencies() {
         nome,
         eixo,
         ordem: competencias.length + 1,
+        descricao: descricao || undefined,
       };
       persist([...competencias, newComp]);
       toast({ title: "Competência adicionada" });
@@ -78,13 +84,30 @@ export default function Competencies() {
           {competencias.map((c) => (
             <Card key={c.id}>
               <CardContent className="flex items-center justify-between py-4">
-                <div>
-                  <span className="font-medium">{c.nome}</span>
-                  <Badge variant="outline" className="ml-3 text-xs capitalize">
-                    {c.eixo}
-                  </Badge>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{c.nome}</span>
+                    <Badge variant="outline" className="text-xs capitalize shrink-0">
+                      {c.eixo}
+                    </Badge>
+                    {c.descricao && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-muted-foreground shrink-0 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p className="text-sm"><strong>O que avaliar:</strong> {c.descricao}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
+                  {c.descricao && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{c.descricao}</p>
+                  )}
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1 shrink-0 ml-2">
                   <Button variant="ghost" size="icon" onClick={() => openEdit(c)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -123,6 +146,15 @@ export default function Competencies() {
                     <SelectItem value="comportamento">Comportamento</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div>
+                <Label>O que avaliar (texto de auxílio)</Label>
+                <Textarea
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                  placeholder="Descreva o que deve ser avaliado nesta competência..."
+                  rows={3}
+                />
               </div>
             </div>
             <DialogFooter>
