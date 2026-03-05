@@ -1,21 +1,32 @@
 
 
-# Exibir texto de auxílio na Calibração
+# Ajustar escala para 4 níveis (Matriz de Habilidade)
 
-## Mudança
+## Nova escala
 
-No `src/pages/Calibration.tsx`, exibir o campo `descricao` (texto "O que avaliar") de cada competência abaixo do nome, dentro do card de avaliação.
+| Nível | Label | Emoji | Cor |
+|-------|-------|-------|-----|
+| 1 | Necessita Conhecer | 🔴 | vermelho |
+| 2 | Apto com Acompanhamento | 🟠 | laranja |
+| 3 | Apto com Autonomia | 🔵 | azul |
+| 4 | Apto a Multiplicar | 🟢 | verde |
 
-### Alteração (linha ~182-186)
-Após o nome da competência e o badge do eixo, adicionar um parágrafo com `comp.descricao` em texto menor e cor `text-muted-foreground`, caso exista:
+## Arquivos afetados
 
-```tsx
-<span className="font-medium">{comp.nome}</span>
-...
-{comp.descricao && (
-  <p className="text-xs text-muted-foreground mt-1">{comp.descricao}</p>
-)}
-```
+### 1. `src/pages/Calibration.tsx`
+- `NOTA_LABELS`: 3 níveis → 4 níveis com os novos textos
+- Grid: `grid-cols-3` → `grid-cols-4`, iterar `[1,2,3,4]`
 
-Apenas 1 arquivo afetado, sem mudanças de lógica.
+### 2. `src/pages/PDI.tsx`
+- `NOTA_LABELS`: atualizar para 4 níveis
+- `pontosFortes`: `nota === 3` → `nota >= 3`
+- `prioridade`: `nota <= 2` → `nota <= 2` (sem mudança)
+
+### 3. `src/components/NineBoxChart.tsx`
+- Mapeamento: `(valor - 1) / 2` → `(valor - 1) / 3` (range 1-4 → 0-1)
+
+### 4. `src/components/CompetencyRadar.tsx`
+- Duas ocorrências de `PolarRadiusAxis domain={[0, 3]}` → `domain={[0, 4]}` e `tickCount={5}`
+
+Mudança puramente de escala, sem alteração de estrutura de dados.
 
