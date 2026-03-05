@@ -47,7 +47,7 @@ export default function CompetencyRadar({ lideres, competencias, groupByArea }: 
         <RadarChart data={data}>
           <PolarGrid />
           <PolarAngleAxis dataKey="competencia" tick={{ fontSize: 11 }} />
-          <PolarRadiusAxis domain={[0, 3]} tickCount={4} />
+          <PolarRadiusAxis domain={[0, 4]} tickCount={5} />
           {areas.map((area) => (
             <Radar
               key={area}
@@ -80,7 +80,7 @@ export default function CompetencyRadar({ lideres, competencias, groupByArea }: 
       <RadarChart data={data}>
         <PolarGrid />
         <PolarAngleAxis dataKey="competencia" tick={{ fontSize: 11 }} />
-        <PolarRadiusAxis domain={[0, 3]} tickCount={4} />
+        <PolarRadiusAxis domain={[0, 4]} tickCount={5} />
         {lideres.map((l, i) => (
           <Radar
             key={l.id}

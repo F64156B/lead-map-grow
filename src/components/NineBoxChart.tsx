@@ -20,9 +20,9 @@ export default function NineBoxChart({ lideres, competencias, onSelect, selected
   const plotData = lideres.map((l) => {
     const desemp = calcMedia(l, competencias, "desempenho");
     const comport = calcMedia(l, competencias, "comportamento");
-    // Scale from 1-3 to 0-1
-    const x = (desemp - 1) / 2;
-    const y = (comport - 1) / 2;
+    // Scale from 1-4 to 0-1
+    const x = (desemp - 1) / 3;
+    const y = (comport - 1) / 3;
     return { lider: l, x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) };
   });
 
