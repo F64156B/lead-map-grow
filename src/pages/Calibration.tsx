@@ -178,11 +178,16 @@ export default function Calibration() {
             return (
               <Card key={comp.id} className="card-elevated border-0">
                 <CardContent className="pt-6">
-                  <div className="mb-1 flex items-center justify-between">
-                    <span className="font-medium">{comp.nome}</span>
-                    <Badge variant="outline" className="text-xs capitalize">
-                      {comp.eixo}
-                    </Badge>
+                  <div className="mb-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{comp.nome}</span>
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {comp.eixo}
+                      </Badge>
+                    </div>
+                    {comp.descricao && (
+                      <p className="text-xs text-muted-foreground mt-1">{comp.descricao}</p>
+                    )}
                   </div>
                   <div className="mt-3 grid grid-cols-3 gap-2">
                     {[1, 2, 3].map((nota) => {
