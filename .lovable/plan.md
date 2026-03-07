@@ -1,32 +1,40 @@
 
 
-# Ajustar escala para 4 níveis (Matriz de Habilidade)
+# Post LinkedIn — IA no RH durante viagem a trabalho em GO
 
-## Nova escala
+Este não é uma tarefa de implementação de código, então segue o conteúdo diretamente.
 
-| Nível | Label | Emoji | Cor |
-|-------|-------|-------|-----|
-| 1 | Necessita Conhecer | 🔴 | vermelho |
-| 2 | Apto com Acompanhamento | 🟠 | laranja |
-| 3 | Apto com Autonomia | 🔵 | azul |
-| 4 | Apto a Multiplicar | 🟢 | verde |
+---
 
-## Arquivos afetados
+**Sugestão de post:**
 
-### 1. `src/pages/Calibration.tsx`
-- `NOTA_LABELS`: 3 níveis → 4 níveis com os novos textos
-- Grid: `grid-cols-3` → `grid-cols-4`, iterar `[1,2,3,4]`
+---
 
-### 2. `src/pages/PDI.tsx`
-- `NOTA_LABELS`: atualizar para 4 níveis
-- `pontosFortes`: `nota === 3` → `nota >= 3`
-- `prioridade`: `nota <= 2` → `nota <= 2` (sem mudança)
+**De uma reunião em Goiás saímos com a liderança calibrada e um plano de desenvolvimento pronto.**
 
-### 3. `src/components/NineBoxChart.tsx`
-- Mapeamento: `(valor - 1) / 2` → `(valor - 1) / 3` (range 1-4 → 0-1)
+Na semana passada viajei a trabalho para GO com um objetivo claro: discutir o desenvolvimento da nossa liderança.
 
-### 4. `src/components/CompetencyRadar.tsx`
-- Duas ocorrências de `PolarRadiusAxis domain={[0, 3]}` → `domain={[0, 4]}` e `tickCount={5}`
+O que mudou dessa vez? Levamos Inteligência Artificial para a mesa de reunião.
 
-Mudança puramente de escala, sem alteração de estrutura de dados.
+Durante o próprio encontro, construímos um sistema de avaliação de competências usando IA. No mesmo dia:
+
+→ Definimos as competências-chave alinhadas à nossa Matriz de Habilidade em 4 níveis
+→ Calibramos cada líder em tempo real, competência por competência
+→ A Matriz 9-Box foi gerada automaticamente a partir das avaliações
+→ O Radar de Competências mostrou visualmente os gaps e fortalezas de cada um
+→ Saímos da sala com o PDI (Plano de Desenvolvimento Individual) pronto para cada líder
+
+O que antes levava semanas de planilhas, consolidação e idas e vindas entre RH e gestão, aconteceu em uma única reunião.
+
+A IA não substituiu a discussão — ela acelerou. O tempo que economizamos compilando dados, investimos em conversa de qualidade sobre pessoas.
+
+Isso é RH estratégico: menos planilha, mais decisão. Menos burocracia, mais desenvolvimento.
+
+A tecnologia não tira o humano do RH. Ela devolve o tempo para que o RH seja, de fato, humano.
+
+#RecursosHumanos #InteligênciaArtificial #DesenvolvimentoDeLiderança #RHEstratégico #Inovação #GestãoDePessoas #PDI #Matriz9Box #IAnoRH
+
+---
+
+Sinta-se à vontade para ajustar detalhes como nome da cidade, datas ou menções a pessoas e empresa.
 
