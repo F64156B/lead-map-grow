@@ -14,15 +14,43 @@ interface Props {
   lideres: Lider[];
   competencias: Competencia[];
   groupByArea?: boolean;
+  showAverage?: boolean;
 }
 
-export default function CompetencyRadar({ lideres, competencias, groupByArea }: Props) {
+export default function CompetencyRadar({ lideres, competencias, groupByArea, showAverage }: Props) {
   if (competencias.length === 0) {
     return <div className="py-8 text-center text-muted-foreground">Nenhuma competência cadastrada.</div>;
   }
 
+  // Average view — single line with overall average
+  if (showAverage && !groupByArea) {
+    const data = competencias.map((c) => {
+      const avg = lideres.length > 0
+        ? lideres.reduce((sum, l) => sum + (l.avaliacoes[c.id] || 0), 0) / lideres.length
+        : 0;
+      return { competencia: c.nome, "Média Geral": Math.round(avg * 100) / 100 };
+    });
+
+    return (
+      <ResponsiveContainer width="100%" height={350}>
+        <RadarChart data={data}>
+          <PolarGrid />
+          <PolarAngleAxis dataKey="competencia" tick={{ fontSize: 11 }} />
+          <PolarRadiusAxis domain={[0, 4]} tickCount={5} />
+          <Radar
+            name="Média Geral"
+            dataKey="Média Geral"
+            stroke="#F28C00"
+            fill="#F28C00"
+            fillOpacity={0.2}
+          />
+          <Legend />
+        </RadarChart>
+      </ResponsiveContainer>
+    );
+  }
+
   if (groupByArea) {
-    // Group leaders by area and average their scores
     const areaMap = new Map<string, Lider[]>();
     lideres.forEach((l) => {
       const list = areaMap.get(l.area) || [];
@@ -73,15 +101,13 @@ export default function CompetencyRadar({ lideres, competencias, groupByArea }: 
     return point;
   });
 
-  const COLORS = ["#F28C00", "#2563EB", "#16A34A", "#9333EA", "#DC2626", "#CA8A04", "#0891B2", "#6D28D9"];
-
   return (
     <ResponsiveContainer width="100%" height={350}>
       <RadarChart data={data}>
         <PolarGrid />
         <PolarAngleAxis dataKey="competencia" tick={{ fontSize: 11 }} />
         <PolarRadiusAxis domain={[0, 4]} tickCount={5} />
-        {lideres.map((l, i) => (
+        {lideres.map((l) => (
           <Radar
             key={l.id}
             name={l.nome}
