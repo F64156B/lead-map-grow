@@ -1,32 +1,29 @@
 
 
-# Ajustar escala para 4 níveis (Matriz de Habilidade)
+# Radar: média geral + comparação por área + listagem de GAPs
 
-## Nova escala
+## O que muda
 
-| Nível | Label | Emoji | Cor |
-|-------|-------|-------|-----|
-| 1 | Necessita Conhecer | 🔴 | vermelho |
-| 2 | Apto com Acompanhamento | 🟠 | laranja |
-| 3 | Apto com Autonomia | 🔵 | azul |
-| 4 | Apto a Multiplicar | 🟢 | verde |
+### 1. `src/pages/Dashboard.tsx`
+- Quando nenhum líder estiver selecionado na view "Individual", exibir **uma única linha no radar** com a **média geral de todos os líderes avaliados** (ao invés de mostrar todos sobrepostos).
+- Adicionar abaixo do radar uma seção **"Principais GAPs"**: lista das competências ordenadas da menor média para a maior, destacando as que têm média ≤ 2.
+- Na view "Por Área", manter o comportamento atual (radar já mostra médias por área com `groupByArea`).
 
-## Arquivos afetados
+### 2. `src/components/CompetencyRadar.tsx`
+- Adicionar suporte a uma nova prop `showAverage?: boolean`.
+- Quando `showAverage=true` e nenhum líder específico selecionado, calcular a média de todos os líderes por competência e renderizar uma única linha "Média Geral" no radar.
+- Quando `groupByArea=true`, manter o comportamento atual (já funciona).
 
-### 1. `src/pages/Calibration.tsx`
-- `NOTA_LABELS`: 3 níveis → 4 níveis com os novos textos
-- Grid: `grid-cols-3` → `grid-cols-4`, iterar `[1,2,3,4]`
+### 3. Seção de GAPs (no `Dashboard.tsx`)
+- Calcular para cada competência a média de todos os líderes avaliados (ou filtrados por área).
+- Ordenar do menor para o maior.
+- Renderizar uma lista/tabela com: nome da competência, eixo, média, e um badge de cor (🔴 ≤ 1.5, 🟠 ≤ 2.5, 🔵 ≤ 3.5, 🟢 > 3.5).
+- Destacar as competências com média ≤ 2 como "GAPs prioritários".
 
-### 2. `src/pages/PDI.tsx`
-- `NOTA_LABELS`: atualizar para 4 níveis
-- `pontosFortes`: `nota === 3` → `nota >= 3`
-- `prioridade`: `nota <= 2` → `nota <= 2` (sem mudança)
+## Resumo das alterações
 
-### 3. `src/components/NineBoxChart.tsx`
-- Mapeamento: `(valor - 1) / 2` → `(valor - 1) / 3` (range 1-4 → 0-1)
-
-### 4. `src/components/CompetencyRadar.tsx`
-- Duas ocorrências de `PolarRadiusAxis domain={[0, 3]}` → `domain={[0, 4]}` e `tickCount={5}`
-
-Mudança puramente de escala, sem alteração de estrutura de dados.
+| Arquivo | Mudança |
+|---------|---------|
+| `CompetencyRadar.tsx` | Nova prop `showAverage`, lógica de média geral |
+| `Dashboard.tsx` | Passar `showAverage` quando sem seleção; nova seção de GAPs abaixo do radar |
 
