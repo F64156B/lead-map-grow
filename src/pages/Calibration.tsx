@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { getLider, getCompetencias, saveLider, isLiderAvaliado, resetCalibracaoLider, registrarMudanca, getAreaColor } from "@/data/store";
+import { isLiderAvaliado, getAreaColor } from "@/data/store";
+import { useData } from "@/contexts/DataContext";
 import { toast } from "@/hooks/use-toast";
 
 const NOTA_LABELS: Record<number, { label: string; emoji: string; color: string }> = {
@@ -20,12 +21,20 @@ const NOTA_LABELS: Record<number, { label: string; emoji: string; color: string 
 export default function Calibration() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const lider = getLider(id || "");
-  const competencias = getCompetencias();
+  const { lideres, competencias, saveLider, resetCalibracaoLider, registrarMudanca, loading } = useData();
+  const lider = lideres.find((l) => l.id === id);
 
   const [avaliacoes, setAvaliacoes] = useState<Record<string, number>>(
     () => lider?.avaliacoes || {}
   );
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="py-20 text-center text-muted-foreground">Carregando...</div>
+      </Layout>
+    );
+  }
 
   if (!lider) {
     return (
@@ -35,16 +44,16 @@ export default function Calibration() {
     );
   }
 
-  const handleSave = () => {
-    saveLider({ ...lider, avaliacoes });
+  const handleSave = async () => {
+    await saveLider({ ...lider, avaliacoes });
     const descricao = competencias.map(c => `${c.nome}: ${avaliacoes[c.id] || '-'}`).join(', ');
-    registrarMudanca("calibracao", lider.id, lider.nome, `Calibração salva — ${descricao}`);
+    await registrarMudanca("calibracao", lider.id, lider.nome, `Calibração salva — ${descricao}`);
     toast({ title: "Avaliação salva!", description: `Calibração de ${lider.nome} salva com sucesso.` });
     navigate("/");
   };
 
-  const handleReset = () => {
-    resetCalibracaoLider(lider.id);
+  const handleReset = async () => {
+    await resetCalibracaoLider(lider.id);
     setAvaliacoes({});
     toast({ title: "Calibração resetada", description: `Avaliação de ${lider.nome} foi limpa.` });
   };
@@ -95,7 +104,6 @@ export default function Calibration() {
 
         {/* Leader Profile */}
         <Card className="overflow-hidden card-elevated border-0">
-          {/* Area color strip */}
           <div className="h-1.5 w-full" style={{ backgroundColor: areaColor }} />
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -111,7 +119,6 @@ export default function Calibration() {
               <div><span className="text-muted-foreground">Idade:</span> {lider.idade}</div>
             </div>
 
-            {/* Formação Acadêmica */}
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <GraduationCap className="h-4 w-4 text-primary" />
@@ -135,7 +142,6 @@ export default function Calibration() {
               </div>
             </div>
 
-            {/* Experiência Profissional */}
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <Briefcase className="h-4 w-4 text-primary" />
@@ -221,7 +227,7 @@ export default function Calibration() {
             <Save className="h-4 w-4" /> Salvar Avaliação
           </Button>
           {allFilled && (
-            <Button variant="outline" onClick={() => { handleSave(); navigate(`/pdi/${lider.id}`); }} size="lg" className="gap-2">
+            <Button variant="outline" onClick={async () => { await handleSave(); navigate(`/pdi/${lider.id}`); }} size="lg" className="gap-2">
               <ClipboardList className="h-4 w-4" /> Salvar & Definir PDI
             </Button>
           )}
