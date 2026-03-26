@@ -10,7 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { getLideres, getCompetencias, isLiderAvaliado, getAreas, resetCalibracaoLider } from "@/data/store";
+import { isLiderAvaliado, getAreas } from "@/data/store";
+import { useData } from "@/contexts/DataContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { toast } from "@/hooks/use-toast";
 import dpaLogo from "@/assets/DPA.png";
@@ -19,10 +20,8 @@ export default function Index() {
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [areaFiltro, setAreaFiltro] = useState("todas");
-  const [refreshKey, setRefreshKey] = useState(0);
 
-  const lideres = useMemo(() => getLideres(), [refreshKey]);
-  const competencias = getCompetencias();
+  const { lideres, competencias, resetCalibracaoLider, registrarMudanca, loading } = useData();
   const areas = useMemo(() => getAreas(lideres), [lideres]);
   const { user: usuario } = useCurrentUser();
 
@@ -39,6 +38,14 @@ export default function Index() {
       return matchBusca && matchArea;
     });
   }, [lideres, busca, areaFiltro]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="py-20 text-center text-muted-foreground">Carregando dados...</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -188,9 +195,9 @@ export default function Index() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => {
-                                    resetCalibracaoLider(lider.id);
-                                    setRefreshKey(k => k + 1);
+                                  <AlertDialogAction onClick={async () => {
+                                    await resetCalibracaoLider(lider.id);
+                                    await registrarMudanca("reset", lider.id, lider.nome, "Calibração resetada — todas as avaliações foram limpas.");
                                     toast({ title: "Calibração resetada", description: `${lider.nome} foi limpo.` });
                                   }}>Confirmar</AlertDialogAction>
                                 </AlertDialogFooter>

@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
+import { DataProvider } from "@/contexts/DataContext";
 import Index from "./pages/Index";
 import Calibration from "./pages/Calibration";
 import Dashboard from "./pages/Dashboard";
@@ -53,21 +54,23 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={session ? <Navigate to="/" replace /> : <LoginPage />} />
-            <Route path="/" element={<ProtectedRoute session={session}><Index /></ProtectedRoute>} />
-            <Route path="/calibrar/:id" element={<ProtectedRoute session={session}><Calibration /></ProtectedRoute>} />
-            <Route path="/pdi" element={<ProtectedRoute session={session}><PDI /></ProtectedRoute>} />
-            <Route path="/pdi/:id" element={<ProtectedRoute session={session}><PDI /></ProtectedRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute session={session}><Dashboard /></ProtectedRoute>} />
-            <Route path="/competencias" element={<ProtectedRoute session={session}><Competencies /></ProtectedRoute>} />
-            <Route path="/usuarios" element={<ProtectedRoute session={session}><UsersPage /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <DataProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={session ? <Navigate to="/" replace /> : <LoginPage />} />
+              <Route path="/" element={<ProtectedRoute session={session}><Index /></ProtectedRoute>} />
+              <Route path="/calibrar/:id" element={<ProtectedRoute session={session}><Calibration /></ProtectedRoute>} />
+              <Route path="/pdi" element={<ProtectedRoute session={session}><PDI /></ProtectedRoute>} />
+              <Route path="/pdi/:id" element={<ProtectedRoute session={session}><PDI /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute session={session}><Dashboard /></ProtectedRoute>} />
+              <Route path="/competencias" element={<ProtectedRoute session={session}><Competencies /></ProtectedRoute>} />
+              <Route path="/usuarios" element={<ProtectedRoute session={session}><UsersPage /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </DataProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

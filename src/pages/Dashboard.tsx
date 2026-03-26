@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { getLideres, getCompetencias, calcMedia, getAreas, getAreaColor, isLiderAvaliado } from "@/data/store";
+import { calcMedia, getAreas, getAreaColor, isLiderAvaliado } from "@/data/store";
+import { useData } from "@/contexts/DataContext";
 import type { Lider, Competencia } from "@/data/store";
 import NineBoxChart from "@/components/NineBoxChart";
 import CompetencyRadar from "@/components/CompetencyRadar";
@@ -30,8 +31,7 @@ function getGapLabel(media: number): string {
 }
 
 export default function Dashboard() {
-  const lideres = getLideres();
-  const competencias = getCompetencias();
+  const { lideres, competencias, loading } = useData();
   const areas = useMemo(() => getAreas(lideres), [lideres]);
   const [areaFiltro, setAreaFiltro] = useState("todas");
   const [selectedLider, setSelectedLider] = useState<string | null>(null);
@@ -54,6 +54,14 @@ export default function Dashboard() {
   }, [avaliados, competencias]);
 
   const priorityGaps = gaps.filter((g) => g.media <= 2);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="py-20 text-center text-muted-foreground">Carregando dados...</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -87,7 +95,6 @@ export default function Dashboard() {
           </Card>
         ) : (
           <>
-            {/* 9-Box */}
             <Card>
               <CardHeader>
                 <CardTitle>Matriz 9-Box</CardTitle>
@@ -102,7 +109,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Radar Chart */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Radar de Competências</CardTitle>
@@ -147,7 +153,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* GAPs */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

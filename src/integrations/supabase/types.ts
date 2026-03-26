@@ -14,6 +14,179 @@ export type Database = {
   }
   public: {
     Tables: {
+      avaliacoes: {
+        Row: {
+          competencia_id: string
+          id: string
+          lider_id: string
+          nota: number
+          updated_at: string
+        }
+        Insert: {
+          competencia_id: string
+          id?: string
+          lider_id: string
+          nota: number
+          updated_at?: string
+        }
+        Update: {
+          competencia_id?: string
+          id?: string
+          lider_id?: string
+          nota?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avaliacoes_competencia_id_fkey"
+            columns: ["competencia_id"]
+            isOneToOne: false
+            referencedRelation: "competencias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_lider_id_fkey"
+            columns: ["lider_id"]
+            isOneToOne: false
+            referencedRelation: "lideres"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competencias: {
+        Row: {
+          descricao: string | null
+          eixo: string
+          id: string
+          nome: string
+          ordem: number
+        }
+        Insert: {
+          descricao?: string | null
+          eixo: string
+          id: string
+          nome: string
+          ordem?: number
+        }
+        Update: {
+          descricao?: string | null
+          eixo?: string
+          id?: string
+          nome?: string
+          ordem?: number
+        }
+        Relationships: []
+      }
+      lideres: {
+        Row: {
+          area: string
+          experiencia: Json
+          formacao: Json
+          id: string
+          idade: number
+          nome: string
+        }
+        Insert: {
+          area: string
+          experiencia?: Json
+          formacao?: Json
+          id?: string
+          idade?: number
+          nome: string
+        }
+        Update: {
+          area?: string
+          experiencia?: Json
+          formacao?: Json
+          id?: string
+          idade?: number
+          nome?: string
+        }
+        Relationships: []
+      }
+      log_mudancas: {
+        Row: {
+          descricao: string
+          id: string
+          lider_id: string
+          lider_nome: string
+          timestamp: string
+          tipo: string
+          usuario: string
+        }
+        Insert: {
+          descricao: string
+          id?: string
+          lider_id: string
+          lider_nome: string
+          timestamp?: string
+          tipo: string
+          usuario?: string
+        }
+        Update: {
+          descricao?: string
+          id?: string
+          lider_id?: string
+          lider_nome?: string
+          timestamp?: string
+          tipo?: string
+          usuario?: string
+        }
+        Relationships: []
+      }
+      pdi_acoes: {
+        Row: {
+          atitude: string
+          competencia_id: string
+          conhecimento: string
+          created_at: string
+          habilidade: string
+          id: string
+          indicadores: string
+          lider_id: string
+          metodologia: string
+          prazo: string
+          responsavel: string
+          status: string
+        }
+        Insert: {
+          atitude?: string
+          competencia_id: string
+          conhecimento?: string
+          created_at?: string
+          habilidade?: string
+          id?: string
+          indicadores?: string
+          lider_id: string
+          metodologia?: string
+          prazo?: string
+          responsavel?: string
+          status?: string
+        }
+        Update: {
+          atitude?: string
+          competencia_id?: string
+          conhecimento?: string
+          created_at?: string
+          habilidade?: string
+          id?: string
+          indicadores?: string
+          lider_id?: string
+          metodologia?: string
+          prazo?: string
+          responsavel?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdi_acoes_lider_id_fkey"
+            columns: ["lider_id"]
+            isOneToOne: false
+            referencedRelation: "lideres"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string

@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getLider, getLideres, getCompetencias, savePDI, isLiderAvaliado } from "@/data/store";
+import { isLiderAvaliado } from "@/data/store";
+import { useData } from "@/contexts/DataContext";
 import type { AcaoPDI } from "@/data/store";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
@@ -26,10 +27,16 @@ const NOTA_LABELS: Record<number, string> = {
   4: "Apto a Multiplicar",
 };
 
-// PDI List page (no :id param)
 function PDIList() {
-  const lideres = getLideres();
-  const competencias = getCompetencias();
+  const { lideres, competencias, loading } = useData();
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="py-20 text-center text-muted-foreground">Carregando...</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -67,14 +74,21 @@ function PDIList() {
   );
 }
 
-// PDI Detail page
 function PDIDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const lider = getLider(id || "");
-  const competencias = getCompetencias();
+  const { lideres, competencias, savePDI, registrarMudanca, loading } = useData();
+  const lider = lideres.find((l) => l.id === id);
 
   const [acoes, setAcoes] = useState<AcaoPDI[]>(() => lider?.pdi || []);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="py-20 text-center text-muted-foreground">Carregando...</div>
+      </Layout>
+    );
+  }
 
   if (!lider) {
     return (
@@ -122,8 +136,9 @@ function PDIDetail() {
     setAcoes((prev) => prev.filter((a) => a.id !== acaoId));
   };
 
-  const handleSave = () => {
-    savePDI(lider.id, acoes);
+  const handleSave = async () => {
+    await savePDI(lider.id, acoes);
+    await registrarMudanca("pdi", lider.id, lider.nome, `PDI atualizado — ${acoes.length} ação(ões)`);
     toast({ title: "PDI salvo!", description: `Plano de desenvolvimento de ${lider.nome} salvo com sucesso.` });
   };
 
@@ -146,7 +161,6 @@ function PDIDetail() {
         <CardContent className="space-y-4">
           {compAcoes.map((acao) => (
             <div key={acao.id} className="space-y-3 rounded-lg border bg-muted/20 p-4">
-              {/* Row 1: Conhecimento | Habilidade | Atitude */}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Conhecimento</label>
@@ -177,7 +191,6 @@ function PDIDetail() {
                 </div>
               </div>
 
-              {/* Row 2: Metodologia */}
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Metodologia</label>
                 <Textarea
@@ -188,7 +201,6 @@ function PDIDetail() {
                 />
               </div>
 
-              {/* Row 3: Indicadores */}
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Indicadores Avaliados</label>
                 <Textarea
@@ -199,7 +211,6 @@ function PDIDetail() {
                 />
               </div>
 
-              {/* Row 4: Prazo | Responsável | Status */}
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <Input
                   placeholder="Prazo (ex: Jun/2026)"
@@ -252,7 +263,6 @@ function PDIDetail() {
           </Button>
         </div>
 
-        {/* Header */}
         <Card>
           <CardContent className="pt-6">
             <h2 className="text-xl font-bold">{lider.nome}</h2>

@@ -10,21 +10,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { getCompetencias, saveCompetencias } from "@/data/store";
+import { useData } from "@/contexts/DataContext";
 import type { Competencia } from "@/data/store";
 import { toast } from "@/hooks/use-toast";
 
 export default function Competencies() {
-  const [competencias, setCompetencias] = useState<Competencia[]>(getCompetencias);
+  const { competencias, saveCompetencias, loading } = useData();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Competencia | null>(null);
   const [nome, setNome] = useState("");
   const [eixo, setEixo] = useState<"desempenho" | "comportamento">("desempenho");
   const [descricao, setDescricao] = useState("");
 
-  const persist = (next: Competencia[]) => {
-    setCompetencias(next);
-    saveCompetencias(next);
+  const persist = async (next: Competencia[]) => {
+    await saveCompetencias(next);
   };
 
   const openNew = () => {
@@ -43,10 +42,10 @@ export default function Competencies() {
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!nome.trim()) return;
     if (editing) {
-      persist(competencias.map((c) => (c.id === editing.id ? { ...c, nome, eixo, descricao: descricao || undefined } : c)));
+      await persist(competencias.map((c) => (c.id === editing.id ? { ...c, nome, eixo, descricao: descricao || undefined } : c)));
       toast({ title: "Competência atualizada" });
     } else {
       const newComp: Competencia = {
@@ -56,16 +55,24 @@ export default function Competencies() {
         ordem: competencias.length + 1,
         descricao: descricao || undefined,
       };
-      persist([...competencias, newComp]);
+      await persist([...competencias, newComp]);
       toast({ title: "Competência adicionada" });
     }
     setDialogOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    persist(competencias.filter((c) => c.id !== id));
+  const handleDelete = async (id: string) => {
+    await persist(competencias.filter((c) => c.id !== id));
     toast({ title: "Competência removida" });
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="py-20 text-center text-muted-foreground">Carregando...</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
